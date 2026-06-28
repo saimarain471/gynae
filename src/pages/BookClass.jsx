@@ -76,7 +76,7 @@ export default function BookClass() {
     if (error) {
       setSubmitError('Something went wrong. Please try again or contact us on WhatsApp.')
       console.error(error)
-      throw error
+      return
     }
 
     posthog.capture('class_booking_submitted', {
