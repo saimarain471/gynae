@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { CheckCircle2 } from 'lucide-react'
+import { CheckCircle2, Check } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { posthog } from '../lib/posthog'
 import PaymentInstructions from '../components/PaymentInstructions'
@@ -25,12 +25,28 @@ export default function Booking() {
   const [status, setStatus] = useState('idle')
   const [submitError, setSubmitError] = useState('')
   const [whatsappUrl, setWhatsappUrl] = useState('')
+  const [step, setStep] = useState(1)
 
   const {
     register,
     handleSubmit,
+    trigger,
+    watch,
     formState: { errors, isSubmitting },
-  } = useForm({ resolver: zodResolver(schema), defaultValues: { paymentMethod: '', preferredTimeSlot: '' } })
+  } = useForm({ resolver: zodResolver(schema), mode: 'onChange', defaultValues: { paymentMethod: '', preferredTimeSlot: '' } })
+
+  const paymentMethod = watch('paymentMethod')
+
+  const handleNext = async () => {
+    const isValid = await trigger(['fullName', 'email', 'phone', 'whatsappNumber', 'city', 'preferredDate', 'preferredTimeSlot', 'concern'])
+    if (isValid) setStep(2)
+  }
+
+  const paymentInfoMap = {
+    JazzCash: 'JazzCash: 0300-0000000 (Zainab Mohsin)',
+    EasyPaisa: 'EasyPaisa: 0301-0000000 (Zainab Mohsin)',
+    'Bank Transfer': 'HBL: PK00HABB0000001234567890 (Dr. Zainab Mohsin)',
+  }
 
   const buildWhatsappLink = ({ fullName, paymentMethod, transactionId, preferredDate, preferredTimeSlot }) => {
     const phone = import.meta.env.VITE_WHATSAPP_NUMBER || '03314896544'
@@ -121,90 +137,124 @@ export default function Booking() {
               </div>
             ) : (
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                <div className="grid gap-6 sm:grid-cols-2">
-                  <label className="block">
-                    <span className="text-sm font-semibold text-text">Full Name</span>
-                    <input {...register('fullName')} className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-text outline-none transition focus:border-primary" />
-                    {errors.fullName && <p className="mt-2 text-sm text-red-600">{errors.fullName.message}</p>}
-                  </label>
-                  <label className="block">
-                    <span className="text-sm font-semibold text-text">Email Address</span>
-                    <input {...register('email')} type="email" className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-text outline-none transition focus:border-primary" />
-                    {errors.email && <p className="mt-2 text-sm text-red-600">{errors.email.message}</p>}
-                  </label>
+                <div className="flex items-center justify-center gap-4">
+                  <div className="flex flex-col items-center">
+                    <div className={`flex h-9 w-9 items-center justify-center rounded-full ${step === 1 ? 'bg-primary text-white' : 'bg-gray-100 text-[#6B7280] border border-gray-200'}`}>
+                      {step === 2 ? <Check size={14} /> : '1'}
+                    </div>
+                    <span className="mt-2 text-center text-xs text-[#6B7280]">Your details</span>
+                  </div>
+                  <div className="h-[1px] w-16 bg-gray-200" />
+                  <div className="flex flex-col items-center">
+                    <div className={`flex h-9 w-9 items-center justify-center rounded-full ${step === 2 ? 'bg-primary text-white' : 'bg-gray-100 text-[#6B7280] border border-gray-200'}`}>
+                      2
+                    </div>
+                    <span className="mt-2 text-center text-xs text-[#6B7280]">Payment</span>
+                  </div>
                 </div>
 
-                <div className="grid gap-6 sm:grid-cols-2">
-                  <label className="block">
-                    <span className="text-sm font-semibold text-text">Phone Number</span>
-                    <input {...register('phone')} className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-text outline-none transition focus:border-primary" placeholder="03XX-XXXXXXX" />
-                    {errors.phone && <p className="mt-2 text-sm text-red-600">{errors.phone.message}</p>}
-                  </label>
-                  <label className="block">
-                    <span className="text-sm font-semibold text-text">WhatsApp Number</span>
-                    <input {...register('whatsappNumber')} className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-text outline-none transition focus:border-primary" placeholder="03XX-XXXXXXX" />
-                    {errors.whatsappNumber && <p className="mt-2 text-sm text-red-600">{errors.whatsappNumber.message}</p>}
-                  </label>
-                </div>
+                {step === 1 ? (
+                  <>
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <label className="block">
+                        <span className="text-sm font-semibold text-text">Full Name</span>
+                        <input {...register('fullName')} className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-text outline-none transition focus:border-primary" />
+                        {errors.fullName && <p className="mt-2 text-sm text-red-600">{errors.fullName.message}</p>}
+                      </label>
+                      <label className="block">
+                        <span className="text-sm font-semibold text-text">Email Address</span>
+                        <input {...register('email')} type="email" className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-text outline-none transition focus:border-primary" />
+                        {errors.email && <p className="mt-2 text-sm text-red-600">{errors.email.message}</p>}
+                      </label>
+                    </div>
 
-                <label className="block">
-                  <span className="text-sm font-semibold text-text">City</span>
-                  <input {...register('city')} className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-text outline-none transition focus:border-primary" />
-                  {errors.city && <p className="mt-2 text-sm text-red-600">{errors.city.message}</p>}
-                </label>
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <label className="block">
+                        <span className="text-sm font-semibold text-text">Phone Number</span>
+                        <input {...register('phone')} className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-text outline-none transition focus:border-primary" placeholder="03XX-XXXXXXX" />
+                        {errors.phone && <p className="mt-2 text-sm text-red-600">{errors.phone.message}</p>}
+                      </label>
+                      <label className="block">
+                        <span className="text-sm font-semibold text-text">WhatsApp Number</span>
+                        <input {...register('whatsappNumber')} className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-text outline-none transition focus:border-primary" placeholder="03XX-XXXXXXX" />
+                        {errors.whatsappNumber && <p className="mt-2 text-sm text-red-600">{errors.whatsappNumber.message}</p>}
+                      </label>
+                    </div>
 
-                <div className="grid gap-6 sm:grid-cols-2">
-                  <label className="block">
-                    <span className="text-sm font-semibold text-text">Preferred Date</span>
-                    <input {...register('preferredDate')} type="date" className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-text outline-none transition focus:border-primary" />
-                    {errors.preferredDate && <p className="mt-2 text-sm text-red-600">{errors.preferredDate.message}</p>}
-                  </label>
-                  <label className="block">
-                    <span className="text-sm font-semibold text-text">Preferred Time Slot</span>
-                    <select {...register('preferredTimeSlot')} className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-text outline-none transition focus:border-primary">
-                      <option value="">Choose a time slot</option>
-                      <option value="Morning (9 AM – 12 PM)">Morning (9 AM – 12 PM)</option>
-                      <option value="Afternoon (12 PM – 3 PM)">Afternoon (12 PM – 3 PM)</option>
-                      <option value="Evening (4 PM – 7 PM)">Evening (4 PM – 7 PM)</option>
-                    </select>
-                    {errors.preferredTimeSlot && <p className="mt-2 text-sm text-red-600">{errors.preferredTimeSlot.message}</p>}
-                  </label>
-                </div>
+                    <label className="block">
+                      <span className="text-sm font-semibold text-text">City</span>
+                      <input {...register('city')} className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-text outline-none transition focus:border-primary" />
+                      {errors.city && <p className="mt-2 text-sm text-red-600">{errors.city.message}</p>}
+                    </label>
 
-                <label className="block">
-                  <span className="text-sm font-semibold text-text">Your Concern</span>
-                  <textarea {...register('concern')} rows="4" className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-text outline-none transition focus:border-primary" placeholder="Briefly describe what you'd like to discuss" />
-                  {errors.concern && <p className="mt-2 text-sm text-red-600">{errors.concern.message}</p>}
-                </label>
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <label className="block">
+                        <span className="text-sm font-semibold text-text">Preferred Date</span>
+                        <input {...register('preferredDate')} type="date" className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-text outline-none transition focus:border-primary" />
+                        {errors.preferredDate && <p className="mt-2 text-sm text-red-600">{errors.preferredDate.message}</p>}
+                      </label>
+                      <label className="block">
+                        <span className="text-sm font-semibold text-text">Preferred Time Slot</span>
+                        <select {...register('preferredTimeSlot')} className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-text outline-none transition focus:border-primary">
+                          <option value="">Choose a time slot</option>
+                          <option value="Morning (9 AM – 12 PM)">Morning (9 AM – 12 PM)</option>
+                          <option value="Afternoon (12 PM – 3 PM)">Afternoon (12 PM – 3 PM)</option>
+                          <option value="Evening (4 PM – 7 PM)">Evening (4 PM – 7 PM)</option>
+                        </select>
+                        {errors.preferredTimeSlot && <p className="mt-2 text-sm text-red-600">{errors.preferredTimeSlot.message}</p>}
+                      </label>
+                    </div>
 
-                <div className="grid gap-6 sm:grid-cols-2">
-                  <label className="block">
-                    <span className="text-sm font-semibold text-text">Payment Method</span>
-                    <select {...register('paymentMethod')} className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-text outline-none transition focus:border-primary">
-                      <option value="">Select payment method</option>
-                      <option value="JazzCash">JazzCash</option>
-                      <option value="EasyPaisa">EasyPaisa</option>
-                      <option value="Bank Transfer">Bank Transfer</option>
-                    </select>
-                    {errors.paymentMethod && <p className="mt-2 text-sm text-red-600">{errors.paymentMethod.message}</p>}
-                  </label>
-                  <label className="block">
-                    <span className="text-sm font-semibold text-text">Transaction ID</span>
-                    <input {...register('transactionId')} className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-text outline-none transition focus:border-primary" placeholder="Enter the transaction ID from your payment receipt" />
-                    {errors.transactionId && <p className="mt-2 text-sm text-red-600">{errors.transactionId.message}</p>}
-                  </label>
-                </div>
+                    <label className="block">
+                      <span className="text-sm font-semibold text-text">Your Concern</span>
+                      <textarea {...register('concern')} rows="4" className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-text outline-none transition focus:border-primary" placeholder="Briefly describe what you'd like to discuss" />
+                      {errors.concern && <p className="mt-2 text-sm text-red-600">{errors.concern.message}</p>}
+                    </label>
 
-                <label className="block">
-                  <span className="text-sm font-semibold text-text">Additional Notes</span>
-                  <textarea {...register('additionalNotes')} rows="4" className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-text outline-none transition focus:border-primary" placeholder="Any questions or special requirements?" />
-                </label>
+                    <button type="button" onClick={handleNext} className="inline-flex w-full items-center justify-center rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#245c43]">
+                      Next
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <label className="block">
+                        <span className="text-sm font-semibold text-text">Payment Method</span>
+                        <select {...register('paymentMethod')} className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-text outline-none transition focus:border-primary">
+                          <option value="">Select payment method</option>
+                          <option value="JazzCash">JazzCash</option>
+                          <option value="EasyPaisa">EasyPaisa</option>
+                          <option value="Bank Transfer">Bank Transfer</option>
+                        </select>
+                        {paymentMethod && paymentInfoMap[paymentMethod] && (
+                          <p className="mt-2 text-sm italic text-[#6B7280]">{paymentInfoMap[paymentMethod]}</p>
+                        )}
+                        {errors.paymentMethod && <p className="mt-2 text-sm text-red-600">{errors.paymentMethod.message}</p>}
+                      </label>
+                      <label className="block">
+                        <span className="text-sm font-semibold text-text">Transaction ID</span>
+                        <input {...register('transactionId')} className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-text outline-none transition focus:border-primary" placeholder="Enter the transaction ID from your payment receipt" />
+                        {errors.transactionId && <p className="mt-2 text-sm text-red-600">{errors.transactionId.message}</p>}
+                      </label>
+                    </div>
 
-                {submitError && <p className="text-sm text-red-600">{submitError}</p>}
+                    <label className="block">
+                      <span className="text-sm font-semibold text-text">Additional Notes</span>
+                      <textarea {...register('additionalNotes')} rows="4" className="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-text outline-none transition focus:border-primary" placeholder="Any questions or special requirements?" />
+                    </label>
 
-                <button type="submit" disabled={isSubmitting} className="inline-flex w-full items-center justify-center rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#245c43] disabled:cursor-not-allowed disabled:opacity-70">
-                  {isSubmitting ? 'Submitting...' : 'Submit Booking'}
-                </button>
+                    {submitError && <p className="text-sm text-red-600">{submitError}</p>}
+
+                    <div className="flex flex-col gap-3 sm:flex-row">
+                      <button type="button" onClick={() => setStep(1)} className="text-sm font-medium text-[#6B7280] underline">
+                        Back
+                      </button>
+                      <button type="submit" disabled={isSubmitting} className="inline-flex w-full items-center justify-center rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#245c43] disabled:cursor-not-allowed disabled:opacity-70">
+                        {isSubmitting ? 'Submitting...' : 'Submit Booking'}
+                      </button>
+                    </div>
+                  </>
+                )}
               </form>
             )}
           </div>

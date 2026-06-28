@@ -36,7 +36,7 @@ export default function BookClass() {
     trigger,
     watch,
     formState: { errors, isSubmitting },
-  } = useForm({ resolver: zodResolver(schema), defaultValues: { paymentMethod: '' } })
+  } = useForm({ resolver: zodResolver(schema), mode: 'onChange', defaultValues: { paymentMethod: '' } })
 
   const paymentMethod = watch('paymentMethod')
 
@@ -68,7 +68,7 @@ export default function BookClass() {
 
   const handleNext = async () => {
     try {
-      const isValid = await trigger(['fullName', 'email', 'phone', 'whatsappNumber', 'city'])
+      const isValid = await trigger(['fullName', 'email', 'phone', 'whatsappNumber', 'city'], { shouldFocus: true })
       if (isValid) setStep(2)
     } catch (error) {
       console.debug(error)
