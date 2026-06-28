@@ -56,3 +56,12 @@ h6 {
     font-family: 'Playfair Display', Georgia, serif;
   }
 }
+
+/* Hide scrollbar for horizontal filter pill row */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

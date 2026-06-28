@@ -6,6 +6,7 @@ const navItems = [
   { label: 'Home', to: '/' },
   { label: 'About', to: '/about' },
   { label: 'Classes', to: '/classes' },
+  { label: 'Health Tips', to: '/blog' },
   { label: 'Book Consultation', to: '/booking' },
 ]
 

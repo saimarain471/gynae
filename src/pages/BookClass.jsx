@@ -2,19 +2,21 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { ShieldCheck, Check, CheckCircle2 } from 'lucide-react'
 import { classes } from '../data/classes'
 import { supabase } from '../lib/supabase'
 import { posthog } from '../lib/posthog'
 import PaymentInstructions from '../components/PaymentInstructions'
 
-const schema = z.object({
+const stepOneSchema = z.object({
   fullName: z.string().min(3, 'Please enter your full name.'),
   email: z.string().email('Please enter a valid email address.'),
   phone: z.string().min(10, 'Please enter your phone number.'),
   whatsappNumber: z.string().min(10, 'Please enter your WhatsApp number.'),
   city: z.string().min(2, 'Please enter your city.'),
+})
+
+const stepTwoSchema = z.object({
   paymentMethod: z.enum(['JazzCash', 'EasyPaisa', 'Bank Transfer'], 'Please select a payment method.'),
   transactionId: z.string().min(3, 'Please enter your transaction ID.'),
   additionalNotes: z.string().optional(),
@@ -33,10 +35,15 @@ export default function BookClass() {
   const {
     register,
     handleSubmit,
-    trigger,
     watch,
+    getValues,
+    setError,
+    clearErrors,
     formState: { errors, isSubmitting },
-  } = useForm({ resolver: zodResolver(schema), mode: 'onChange', defaultValues: { paymentMethod: '' } })
+  } = useForm({
+    mode: 'onChange',
+    defaultValues: { paymentMethod: '' },
+  })
 
   const paymentMethod = watch('paymentMethod')
 
@@ -66,13 +73,20 @@ export default function BookClass() {
     )
   }
 
-  const handleNext = async () => {
-    try {
-      const isValid = await trigger(['fullName', 'email', 'phone', 'whatsappNumber', 'city'], { shouldFocus: true })
-      if (isValid) setStep(2)
-    } catch (error) {
-      console.debug(error)
+  const handleNext = () => {
+    const values = getValues()
+    const result = stepOneSchema.safeParse(values)
+
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors
+      Object.entries(fieldErrors).forEach(([field, messages]) => {
+        setError(field, { type: 'validation', message: messages?.[0] ?? 'Invalid value' })
+      })
+      return
     }
+
+    clearErrors()
+    setStep(2)
   }
 
   if (!classData) {
@@ -94,6 +108,16 @@ export default function BookClass() {
 
   const onSubmit = async (values) => {
     setSubmitError('')
+
+    const result = stepTwoSchema.safeParse(values)
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors
+      Object.entries(fieldErrors).forEach(([field, messages]) => {
+        setError(field, { type: 'validation', message: messages?.[0] ?? 'Invalid value' })
+      })
+      return
+    }
+
     const payload = {
       full_name: values.fullName,
       email: values.email,

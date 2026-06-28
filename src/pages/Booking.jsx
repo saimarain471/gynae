@@ -1,13 +1,12 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { CheckCircle2, Check } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { posthog } from '../lib/posthog'
 import PaymentInstructions from '../components/PaymentInstructions'
 
-const schema = z.object({
+const stepOneSchema = z.object({
   fullName: z.string().min(3, 'Please enter your full name.'),
   email: z.string().email('Please enter a valid email address.'),
   phone: z.string().min(10, 'Please enter your phone number.'),
@@ -16,6 +15,9 @@ const schema = z.object({
   preferredDate: z.string().min(10, 'Please enter a preferred date.'),
   preferredTimeSlot: z.enum(['Morning (9 AM – 12 PM)', 'Afternoon (12 PM – 3 PM)', 'Evening (4 PM – 7 PM)'], 'Please select a time slot.'),
   concern: z.string().min(20, 'Please describe your concern in at least 20 characters.'),
+})
+
+const stepTwoSchema = z.object({
   paymentMethod: z.enum(['JazzCash', 'EasyPaisa', 'Bank Transfer'], 'Please select a payment method.'),
   transactionId: z.string().min(3, 'Please enter your transaction ID.'),
   additionalNotes: z.string().optional(),
@@ -30,16 +32,32 @@ export default function Booking() {
   const {
     register,
     handleSubmit,
-    trigger,
     watch,
+    getValues,
+    setError,
+    clearErrors,
     formState: { errors, isSubmitting },
-  } = useForm({ resolver: zodResolver(schema), mode: 'onChange', defaultValues: { paymentMethod: '', preferredTimeSlot: '' } })
+  } = useForm({
+    mode: 'onChange',
+    defaultValues: { paymentMethod: '', preferredTimeSlot: '' },
+  })
 
   const paymentMethod = watch('paymentMethod')
 
-  const handleNext = async () => {
-    const isValid = await trigger(['fullName', 'email', 'phone', 'whatsappNumber', 'city', 'preferredDate', 'preferredTimeSlot', 'concern'])
-    if (isValid) setStep(2)
+  const handleNext = () => {
+    const values = getValues()
+    const result = stepOneSchema.safeParse(values)
+
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors
+      Object.entries(fieldErrors).forEach(([field, messages]) => {
+        setError(field, { type: 'validation', message: messages?.[0] ?? 'Invalid value' })
+      })
+      return
+    }
+
+    clearErrors()
+    setStep(2)
   }
 
   const paymentInfoMap = {
@@ -57,6 +75,16 @@ export default function Booking() {
   const onSubmit = async (values) => {
     setSubmitError('')
     setStatus('submitting')
+
+    const result = stepTwoSchema.safeParse(values)
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors
+      Object.entries(fieldErrors).forEach(([field, messages]) => {
+        setError(field, { type: 'validation', message: messages?.[0] ?? 'Invalid value' })
+      })
+      setStatus('idle')
+      return
+    }
 
     const payload = {
       full_name: values.fullName,
