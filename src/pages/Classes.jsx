@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import ClassCard from '../components/ClassCard'
 import { classes } from '../data/classes'
 import { posthog } from '../lib/posthog'
@@ -7,6 +7,12 @@ const filters = ['All', 'Prenatal', 'Postnatal', 'Baby Care']
 
 export default function Classes() {
   const [activeFilter, setActiveFilter] = useState('All')
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 800)
+    return () => clearTimeout(timer)
+  }, [])
 
   const filteredClasses = useMemo(() => {
     if (activeFilter === 'All') return classes
@@ -43,9 +49,9 @@ export default function Classes() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {filteredClasses.map((classData) => (
-            <ClassCard key={classData.id} classData={classData} />
-          ))}
+          {loading
+            ? Array(6).fill(0).map((_, i) => <ClassCard key={i} loading={true} />)
+            : filteredClasses.map((classData) => <ClassCard key={classData.id} classData={classData} />)}
         </div>
       </div>
     </main>

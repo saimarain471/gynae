@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { CheckCircle2 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { posthog } from '../lib/posthog'
 import PaymentInstructions from '../components/PaymentInstructions'
@@ -32,8 +33,8 @@ export default function Booking() {
   } = useForm({ resolver: zodResolver(schema), defaultValues: { paymentMethod: '', preferredTimeSlot: '' } })
 
   const buildWhatsappLink = ({ fullName, paymentMethod, transactionId, preferredDate, preferredTimeSlot }) => {
-    const phone = import.meta.env.VITE_WHATSAPP_NUMBER || '923000000000'
-    const message = `Assalam o Alaikum Dr. Zainab! I have booked a consultation and sent payment via ${paymentMethod}. My Transaction ID is ${transactionId}. Preferred time: ${preferredDate} ${preferredTimeSlot}. My name is ${fullName}.`
+    const phone = import.meta.env.VITE_WHATSAPP_NUMBER || '03314896544'
+    const message = `Assalam o Alaikum Dr. Zainub! I have booked a consultation and sent payment via ${paymentMethod}. My Transaction ID is ${transactionId}. Preferred time: ${preferredDate} ${preferredTimeSlot}. My name is ${fullName}.`
     return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
   }
 
@@ -79,7 +80,7 @@ export default function Booking() {
         <section className="rounded-[2rem] bg-white p-8 shadow-sm">
           <h1 className="text-3xl font-semibold text-text">Consultation Booking</h1>
           <p className="mt-3 text-sm leading-7 text-text-muted">
-            Consultation fee: PKR 2,000 — 30 minute video call with Dr. Zainab Mohsin.
+            Consultation fee: PKR 2,000 — 30 minute video call with Dr. Zainub Mohsin.
           </p>
         </section>
 
@@ -99,11 +100,14 @@ export default function Booking() {
           <div className="rounded-[2rem] bg-white p-8 shadow-sm">
             {status === 'success' ? (
               <div className="rounded-3xl border border-green-200 bg-green-50 p-8 text-center">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-green-700">✓</div>
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+                  <CheckCircle2 size={36} className="text-[#2D6A4F]" />
+                </div>
                 <h2 className="text-xl font-semibold text-text">Booking received!</h2>
-                <p className="mt-3 text-sm leading-7 text-text-muted">
-                  Dr. Zainab will verify your payment and confirm the video call via WhatsApp.
-                </p>
+                <div className="mx-auto mt-3 max-w-sm space-y-2 text-sm leading-7 text-text-muted">
+                  <p>Your booking has been saved. Dr. Zainab has been notified automatically.</p>
+                  <p className="font-medium text-[#2D6A4F]">Dr. Zainab will confirm your appointment time and send the meeting link to your WhatsApp.</p>
+                </div>
                 <a
                   href={whatsappUrl}
                   target="_blank"
@@ -113,6 +117,7 @@ export default function Booking() {
                 >
                   Confirm on WhatsApp
                 </a>
+                <p className="mt-4 text-xs text-[#6B7280]">You will also receive a confirmation email shortly.</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

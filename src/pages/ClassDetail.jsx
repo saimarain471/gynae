@@ -56,7 +56,7 @@ export default function ClassDetail() {
             <div>
               <h2 className="text-xl font-semibold text-text">Instructor</h2>
               <p className="mt-4 text-sm leading-7 text-text-muted">
-                Dr. Zainab Mohsin is a gynecologist with 10+ years of experience in women&apos;s health education and prenatal care.
+                Dr. Zainub Mohsin is a gynecologist with 10+ years of experience in women&apos;s health education and prenatal care.
               </p>
             </div>
           </div>

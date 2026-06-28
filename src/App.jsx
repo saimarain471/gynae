@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { MessageCircle } from 'lucide-react'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
+import WhatsAppButton from './components/WhatsAppButton'
 import Home from './pages/Home'
 import About from './pages/About'
 import Classes from './pages/Classes'
@@ -24,7 +25,7 @@ function ScrollToTop() {
 }
 
 export default function App() {
-  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '923704731692'
+  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '03314896544'
 
   return (
     <Router>
@@ -43,15 +44,7 @@ export default function App() {
         </Routes>
         <Footer />
 
-        <a
-          href={`https://wa.me/${whatsappNumber}`}
-          target="_blank"
-          rel="noreferrer"
-          className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-lg transition hover:scale-105 hover:bg-secondary"
-          aria-label="Contact on WhatsApp"
-        >
-          <MessageCircle className="h-7 w-7" />
-        </a>
+        <WhatsAppButton />
       </div>
     </Router>
   )

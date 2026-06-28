@@ -33,7 +33,7 @@ export default function BookingForm({ submitLabel, onSubmit, children }) {
 
     try {
       await onSubmit(values)
-      setSuccessMessage('Your booking has been received! Dr. Zainab will verify your payment and send your class access link to your WhatsApp within a few hours.')
+      setSuccessMessage('Your booking has been received! Dr. Zainub will verify your payment and send your class access link to your WhatsApp within a few hours.')
       reset({ paymentMethod: '' })
     } catch (error) {
       setErrorMessage('Something went wrong. Please try again or contact us on WhatsApp.')

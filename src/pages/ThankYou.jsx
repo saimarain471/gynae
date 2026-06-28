@@ -10,10 +10,10 @@ export default function ThankYou() {
         </div>
         <h1 className="text-3xl font-semibold text-text">Booking Received!</h1>
         <p className="mt-4 text-sm leading-7 text-text-muted">
-          Thank you for your booking. Dr. Zainab will verify your payment and connect with you via WhatsApp soon.
+          Thank you for your booking. Dr. Zainub will verify your payment and connect with you via WhatsApp soon.
         </p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-          <a href={`https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER || '923000000000'}`} className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#245c43]" target="_blank" rel="noreferrer">
+          <a href={`https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER || '03314896544'}`} className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#245c43]" target="_blank" rel="noreferrer">
             Confirm on WhatsApp
           </a>
           <Link to="/" className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-text transition hover:bg-slate-50">

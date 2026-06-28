@@ -14,7 +14,7 @@ const stats = [
 
 const testimonials = [
   { name: 'Ayesha Khan', title: 'New Mother', quote: 'The classes gave me confidence and helped me prepare for my first baby.' },
-  { name: 'Sara Malik', title: 'Expecting Mother', quote: 'Dr. Zainab explained every step gently and clearly. Highly recommended.' },
+  { name: 'Sara Malik', title: 'Expecting Mother', quote: 'Dr. Zainub explained every step gently and clearly. Highly recommended.' },
   { name: 'Fatima Raza', title: 'Postpartum Mom', quote: 'The baby care tips were practical and comforting for a new mother.' },
 ]
 
@@ -81,7 +81,7 @@ export default function Home() {
 
       <section className="mx-auto max-w-7xl rounded-[2rem] bg-primary/5 px-6 py-12 text-center shadow-sm lg:px-12">
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-secondary">Consultation</p>
-        <h2 className="mt-4 text-3xl font-semibold text-text">Book a 1-on-1 with Dr. Zainab — PKR 2,000</h2>
+        <h2 className="mt-4 text-3xl font-semibold text-text">Book a 1-on-1 with Dr. Zainub — PKR 2,000</h2>
         <p className="mt-4 text-sm leading-7 text-text-muted">
           Secure a private video consultation for pregnancy support, baby care, and women&apos;s health guidance.
         </p>
