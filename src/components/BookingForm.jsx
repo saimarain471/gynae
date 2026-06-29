@@ -1,31 +1,19 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { posthog } from '../lib/posthog'
+import { bookingSchema } from './bookingSchema'
 
 export default function BookingForm({ submitLabel, onSubmit, children }) {
   const [loading, setLoading] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
 
-  const schema = z.object({
-    fullName: z.string().min(3, 'Please enter your full name.'),
-    email: z.string().email('Please enter a valid email address.'),
-    phone: z.string().min(10, 'Please enter your phone number.'),
-    whatsappNumber: z.string().min(10, 'Please enter your WhatsApp number.'),
-    city: z.string().min(2, 'Please enter your city.'),
-    paymentMethod: z.string().nonempty('Please select a payment method.'),
-    transactionId: z.string().min(3, 'Please enter your transaction ID.'),
-    additionalNotes: z.string().optional(),
-  })
-
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm({ resolver: zodResolver(schema), defaultValues: { paymentMethod: '' } })
+  } = useForm({ resolver: zodResolver(bookingSchema), defaultValues: { paymentMethod: '' } })
 
   const submit = async (values) => {
     setErrorMessage('')

@@ -6,9 +6,6 @@ export const mockPosthog = {
 }
 
 vi.mock('../lib/posthog', () => ({
-  posthog: {
-    capture: vi.fn(),
-    init: vi.fn(),
-  },
+  posthog: mockPosthog,
   initPostHog: vi.fn(),
 }))
