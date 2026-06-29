@@ -8,12 +8,7 @@ import {
   ChevronDown, Loader2, HelpCircle, Star, Clock,
 } from 'lucide-react'
 
-// ─────────────────────────────────────────────────────────────
-// IMPORTANT: Change this password before going live!
-// This is a temporary hardcoded password for admin access.
-// For production, use Supabase Auth or environment variable.
-// ─────────────────────────────────────────────────────────────
-const ADMIN_PASSWORD = 'zainab2025'
+const ADMIN_PASSWORD = import.meta.env.VITE_BLOG_ADMIN_PASSWORD || ''
 
 const BLOG_CATEGORIES = ['Prenatal', 'Postnatal', 'Baby Care', 'General']
 const FAQ_CATEGORIES = ['Appointments', 'Pregnancy', 'Baby Care', 'Postnatal', 'General']

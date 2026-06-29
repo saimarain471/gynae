@@ -8,12 +8,7 @@ import { supabase } from '../lib/supabase'
 import AdminStatCard from '../components/AdminStatCard'
 import AdminBookingRow from '../components/AdminBookingRow'
 
-// ─────────────────────────────────────────────────────────────
-// ⚠️ IMPORTANT: Change this password before going live!
-// Use a strong password and consider moving it to an
-// environment variable: import.meta.env.VITE_ADMIN_PASSWORD
-// ─────────────────────────────────────────────────────────────
-const ADMIN_PASSWORD = 'DrZainab@2025'
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || ''
 
 // ── Skeleton row ──────────────────────────────────────────────
 function TableSkeletonRow() {
