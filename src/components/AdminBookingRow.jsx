@@ -3,6 +3,7 @@ import {
   CheckCircle2, XCircle, MessageCircle,
   ChevronDown, ChevronUp,
 } from 'lucide-react'
+import { toWhatsAppNumber } from '../lib/phone'
 
 const statusStyles = {
   pending:  'bg-[#FEF3C7] text-[#D97706] border border-[#D97706]/20',
@@ -31,7 +32,7 @@ export default function AdminBookingRow({ booking, onStatusChange }) {
   const status = booking.status || 'pending'
 
   const handleWhatsApp = () => {
-    const num = booking.whatsapp_number?.replace(/\D/g, '')
+    const num = toWhatsAppNumber(booking.whatsapp_number)
     let text
     if (isClass) {
       text = `Assalam o Alaikum ${booking.full_name}! Your payment for "${booking.class_title}" has been verified. Here is your class access link: [PASTE LINK HERE]. JazakAllah Khair! — Dr. Zainab Mohsin`

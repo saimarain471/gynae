@@ -5,15 +5,32 @@ import {
   Search, RefreshCw, Leaf,
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { toWhatsAppNumber } from '../lib/phone'
 import AdminStatCard from '../components/AdminStatCard'
 import AdminBookingRow from '../components/AdminBookingRow'
 
 // ─────────────────────────────────────────────────────────────
-// ⚠️ IMPORTANT: Change this password before going live!
-// Use a strong password and consider moving it to an
-// environment variable: import.meta.env.VITE_ADMIN_PASSWORD
+// ⚠️ This is only a light client-side gate. The password ships in
+// the JS bundle, so it is NOT real security — anyone can read it
+// in DevTools. Protect the data with Supabase Row Level Security /
+// Auth on the backend. Set VITE_ADMIN_PASSWORD in your environment.
 // ─────────────────────────────────────────────────────────────
-const ADMIN_PASSWORD = 'DrZainab@2025'
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'DrZainab@2025'
+
+// Compute dashboard stats from the full booking list. Recomputing
+// (rather than incrementally adjusting) keeps stats accurate across
+// arbitrary status transitions.
+function computeStats(all) {
+  const toPktDate = (iso) =>
+    iso ? new Date(iso).toLocaleDateString('en-CA', { timeZone: 'Asia/Karachi' }) : ''
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Karachi' })
+  return {
+    total: all.length,
+    pending: all.filter(b => b.status === 'pending').length,
+    verified: all.filter(b => b.status === 'verified').length,
+    today: all.filter(b => toPktDate(b.created_at) === today).length,
+  }
+}
 
 // ── Skeleton row ──────────────────────────────────────────────
 function TableSkeletonRow() {
@@ -59,7 +76,7 @@ function MobileBookingCard({ booking, onStatusChange }) {
   }
 
   const handleWhatsApp = () => {
-    const num = booking.whatsapp_number?.replace(/\D/g, '')
+    const num = toWhatsAppNumber(booking.whatsapp_number)
     let text
     if (isClass) {
       text = `Assalam o Alaikum ${booking.full_name}! Your payment for "${booking.class_title}" has been verified. Here is your class access link: [PASTE LINK HERE]. JazakAllah Khair! — Dr. Zainab Mohsin`
@@ -233,15 +250,7 @@ export default function Admin() {
       setClassBookings(taggedClasses)
       setConsultationBookings(taggedConsults)
 
-      // Compute stats
-      const all = [...taggedClasses, ...taggedConsults]
-      const today = new Date().toISOString().split('T')[0]
-      setStats({
-        total:    all.length,
-        pending:  all.filter(b => b.status === 'pending').length,
-        verified: all.filter(b => b.status === 'verified').length,
-        today:    all.filter(b => b.created_at?.startsWith(today)).length,
-      })
+      setStats(computeStats([...taggedClasses, ...taggedConsults]))
 
       setLastUpdated(
         new Date().toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' })
@@ -263,18 +272,15 @@ export default function Admin() {
       return
     }
 
-    const updater = prev => prev.map(b => b.id === bookingId ? { ...b, status: newStatus } : b)
-    if (bookingType === 'class') setClassBookings(updater)
-    else setConsultationBookings(updater)
+    const apply = list => list.map(b => b.id === bookingId ? { ...b, status: newStatus } : b)
+    const nextClass = bookingType === 'class' ? apply(classBookings) : classBookings
+    const nextConsult = bookingType === 'class' ? consultationBookings : apply(consultationBookings)
 
-    // Update stats
-    setStats(prev => {
-      const updated = { ...prev }
-      if (newStatus === 'verified') { updated.verified = (updated.verified || 0) + 1; updated.pending = Math.max(0, (updated.pending || 0) - 1) }
-      if (newStatus === 'rejected') { updated.pending = Math.max(0, (updated.pending || 0) - 1) }
-      if (newStatus === 'pending')  { updated.pending = (updated.pending || 0) + 1 }
-      return updated
-    })
+    if (bookingType === 'class') setClassBookings(nextClass)
+    else setConsultationBookings(nextConsult)
+
+    // Recompute stats from the updated data to avoid drift.
+    setStats(computeStats([...nextClass, ...nextConsult]))
   }
 
   const handleLogout = () => {

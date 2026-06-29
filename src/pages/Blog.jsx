@@ -14,6 +14,7 @@ export default function Blog() {
   const [activeCategory, setActiveCategory] = useState('All')
 
   useEffect(() => {
+    document.title = 'Health Tips & Guides — Dr. Zainab Mohsin'
     posthog.capture('blog_page_viewed')
     fetchPosts()
   }, [])
@@ -43,9 +44,6 @@ export default function Blog() {
 
   return (
     <div className="min-h-screen bg-[#FAFAF8]">
-      {/* SEO */}
-      <title>Health Tips &amp; Guides — Dr. Zainab Mohsin</title>
-
       {/* Page header */}
       <section className="bg-[#E1F5EE] py-14">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">

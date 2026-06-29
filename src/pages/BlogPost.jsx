@@ -56,9 +56,13 @@ export default function BlogPost() {
     if (post) {
       // Update document title and meta description for SEO
       document.title = `${post.title} — Dr. Zainab Mohsin`
-      document
-        .querySelector('meta[name="description"]')
-        ?.setAttribute('content', post.excerpt)
+      let meta = document.querySelector('meta[name="description"]')
+      if (!meta) {
+        meta = document.createElement('meta')
+        meta.setAttribute('name', 'description')
+        document.head.appendChild(meta)
+      }
+      meta.setAttribute('content', post.excerpt || '')
 
       // Track PostHog event
       posthog.capture('blog_post_viewed', {
@@ -67,7 +71,7 @@ export default function BlogPost() {
         category: post.category,
       })
     }
-  }, [post])
+  }, [post, slug])
 
   const fetchPost = async () => {
     setLoading(true)
@@ -87,21 +91,35 @@ export default function BlogPost() {
 
     setPost(postData)
 
-    // Increment view count (fire and forget)
-    supabase
-      .from('blog_posts')
-      .update({ views: (postData.views || 0) + 1 })
-      .eq('id', postData.id)
+    // Atomically increment view count via a Postgres function so
+    // concurrent readers don't clobber each other (fire and forget).
+    supabase.rpc('increment_blog_views', { post_id: postData.id })
 
-    // Fetch related posts
-    const { data: related } = await supabase
+    // Fetch related posts in the same category first, then back-fill
+    // with other recent posts if there aren't enough.
+    const relatedSelect = 'id, title, slug, excerpt, cover_image_url, category, read_time'
+    const { data: sameCategory } = await supabase
       .from('blog_posts')
-      .select('id, title, slug, excerpt, cover_image_url, category, read_time')
+      .select(relatedSelect)
       .eq('published', true)
+      .eq('category', postData.category)
       .neq('slug', slug)
       .limit(2)
 
-    setRelatedPosts(related || [])
+    let related = sameCategory || []
+    if (related.length < 2) {
+      const { data: fallback } = await supabase
+        .from('blog_posts')
+        .select(relatedSelect)
+        .eq('published', true)
+        .neq('slug', slug)
+        .order('created_at', { ascending: false })
+        .limit(4)
+      const seen = new Set(related.map(r => r.id))
+      related = [...related, ...(fallback || []).filter(r => !seen.has(r.id))].slice(0, 2)
+    }
+
+    setRelatedPosts(related)
     setLoading(false)
   }
 
