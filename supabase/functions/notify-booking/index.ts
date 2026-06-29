@@ -4,6 +4,8 @@ const MAKE_WEBHOOK_URL = Deno.env.get("MAKE_WEBHOOK_URL") ?? ""
 const DOCTOR_WHATSAPP = Deno.env.get("DOCTOR_WHATSAPP_NUMBER") ?? ""
 const DOCTOR_EMAIL = Deno.env.get("DOCTOR_EMAIL") ?? ""
 
+// Invoked by Supabase database triggers (server-side), not browser requests.
+// CORS headers are included for completeness; set ALLOWED_ORIGIN if calling from a frontend.
 const corsHeaders = {
   "Access-Control-Allow-Origin": Deno.env.get("ALLOWED_ORIGIN") ?? "",
   "Access-Control-Allow-Methods": "POST, OPTIONS",

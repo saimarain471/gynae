@@ -34,6 +34,12 @@ create policy "Deny public read on class bookings"
   to anon
   using (false);
 
+create policy "Allow authenticated full access to class bookings"
+  on class_bookings for all
+  to authenticated
+  using (true)
+  with check (true);
+
 -- ── Consultation bookings ──────────────────────────────────────
 create table if not exists consultation_bookings (
   id uuid default gen_random_uuid() primary key,
@@ -63,3 +69,9 @@ create policy "Deny public read on consultation bookings"
   on consultation_bookings for select
   to anon
   using (false);
+
+create policy "Allow authenticated full access to consultation bookings"
+  on consultation_bookings for all
+  to authenticated
+  using (true)
+  with check (true);
