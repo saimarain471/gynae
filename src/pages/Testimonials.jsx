@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { posthog } from '../lib/posthog'
 import TestimonialCard from '../components/TestimonialCard'
 import StarRating from '../components/StarRating'
-import { Star, CheckCircle, MessageSquarePlus, ArrowRight, Filter } from 'lucide-react'
+import PageHeader from '../components/PageHeader'
+import CategoryFilterBar from '../components/CategoryFilterBar'
+import EmptyState from '../components/EmptyState'
+import { Star, CheckCircle, MessageSquarePlus } from 'lucide-react'
 
 const SERVICE_TYPES = [
   'Consultation',
@@ -127,63 +129,34 @@ export default function Testimonials() {
   return (
     <div className="min-h-screen bg-[#FAFAF8]">
       {/* Page header */}
-      <section className="bg-[#E1F5EE] py-14">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2 mb-3">
-            <Star size={16} className="text-[#52B788]" fill="#52B788" />
-            <span className="text-xs font-semibold uppercase tracking-widest text-[#52B788]">
-              Patient Stories
-            </span>
-          </div>
-          <h1 className="font-['Playfair_Display'] text-3xl md:text-4xl font-bold text-[#1A1A2E]">
-            What Our Patients Say
-          </h1>
-          <p className="mt-3 text-[#6B7280] text-base max-w-xl leading-relaxed">
-            Real experiences from real mothers — every review is verified by our team.
-          </p>
-
-          {/* Stats row */}
-          {!loading && testimonials.length > 0 && (
-            <div className="flex flex-wrap gap-6 mt-6">
-              <div>
-                <p className="text-2xl font-bold text-[#2D6A4F]">{avgRating} ★</p>
-                <p className="text-xs text-[#6B7280] mt-0.5">Average rating</p>
-              </div>
-              <div className="w-px bg-[#B7E4C7]" />
-              <div>
-                <p className="text-2xl font-bold text-[#2D6A4F]">{testimonials.length}</p>
-                <p className="text-xs text-[#6B7280] mt-0.5">Verified reviews</p>
-              </div>
-              <div className="w-px bg-[#B7E4C7]" />
-              <div>
-                <p className="text-2xl font-bold text-[#2D6A4F]">100%</p>
-                <p className="text-xs text-[#6B7280] mt-0.5">Verified patients</p>
-              </div>
+      <PageHeader
+        icon={<Star size={16} className="text-[#52B788]" fill="#52B788" />}
+        badge="Patient Stories"
+        title="What Our Patients Say"
+        description="Real experiences from real mothers — every review is verified by our team."
+      >
+        {!loading && testimonials.length > 0 && (
+          <div className="flex flex-wrap gap-6 mt-6">
+            <div>
+              <p className="text-2xl font-bold text-[#2D6A4F]">{avgRating} ★</p>
+              <p className="text-xs text-[#6B7280] mt-0.5">Average rating</p>
             </div>
-          )}
-        </div>
-      </section>
+            <div className="w-px bg-[#B7E4C7]" />
+            <div>
+              <p className="text-2xl font-bold text-[#2D6A4F]">{testimonials.length}</p>
+              <p className="text-xs text-[#6B7280] mt-0.5">Verified reviews</p>
+            </div>
+            <div className="w-px bg-[#B7E4C7]" />
+            <div>
+              <p className="text-2xl font-bold text-[#2D6A4F]">100%</p>
+              <p className="text-xs text-[#6B7280] mt-0.5">Verified patients</p>
+            </div>
+          </div>
+        )}
+      </PageHeader>
 
       {/* Filter bar */}
-      <div className="sticky top-16 z-30 bg-[#FAFAF8] border-b border-gray-100 shadow-sm">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <div className="flex gap-2 overflow-x-auto py-3 no-scrollbar">
-            {FILTERS.map((f) => (
-              <button
-                key={f}
-                onClick={() => setActiveFilter(f)}
-                className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium cursor-pointer transition-colors ${
-                  activeFilter === f
-                    ? 'bg-[#2D6A4F] text-white shadow-sm'
-                    : 'bg-white text-[#6B7280] border border-gray-200 hover:border-[#52B788]'
-                }`}
-              >
-                {f}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
+      <CategoryFilterBar categories={FILTERS} active={activeFilter} onChange={setActiveFilter} />
 
       {/* Testimonials grid */}
       <main className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10">
@@ -192,15 +165,12 @@ export default function Testimonials() {
             {Array.from({ length: 6 }).map((_, i) => <TestimonialSkeleton key={i} />)}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center gap-3">
-            <div className="w-16 h-16 rounded-full bg-[#E1F5EE] flex items-center justify-center">
-              <Star size={28} className="text-[#52B788]" />
-            </div>
-            <p className="text-[#1A1A2E] font-semibold text-lg">No reviews in this category yet</p>
-            <button onClick={() => setActiveFilter('All')} className="text-[#2D6A4F] text-sm font-medium underline underline-offset-2">
-              View all reviews
-            </button>
-          </div>
+          <EmptyState
+            icon={<Star size={28} className="text-[#52B788]" />}
+            title="No reviews in this category yet"
+            actionLabel="View all reviews"
+            onAction={() => setActiveFilter('All')}
+          />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {filtered.map((t) => (

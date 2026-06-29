@@ -1,12 +1,14 @@
 import { useState, useEffect, useMemo } from 'react'
 import {
-  Lock, LogOut, Eye, EyeOff,
+  LogOut,
   Users, Clock, CheckCircle2, CalendarDays,
   Search, RefreshCw, Leaf,
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import AdminStatCard from '../components/AdminStatCard'
 import AdminBookingRow from '../components/AdminBookingRow'
+import AdminLogin from '../components/AdminLogin'
+import WhatsAppIcon from '../components/WhatsAppIcon'
 
 // ─────────────────────────────────────────────────────────────
 // ⚠️ IMPORTANT: Change this password before going live!
@@ -99,10 +101,7 @@ function MobileBookingCard({ booking, onStatusChange }) {
           )}
           <button onClick={handleWhatsApp}
             className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="#25D366">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-              <path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.558 4.118 1.534 5.843L0 24l6.335-1.518A11.935 11.935 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.006-1.37l-.359-.214-3.737.896.938-3.636-.235-.374A9.819 9.819 0 012.182 12C2.182 6.575 6.575 2.182 12 2.182S21.818 6.575 21.818 12 17.425 21.818 12 21.818z"/>
-            </svg>
+            <WhatsAppIcon size={15} fill="#25D366" />
           </button>
         </div>
       </div>
@@ -110,80 +109,7 @@ function MobileBookingCard({ booking, onStatusChange }) {
   )
 }
 
-// ═══════════════════════════════════════════════════════════════
-// LOGIN SCREEN
-// ═══════════════════════════════════════════════════════════════
-function LoginScreen({ onSuccess }) {
-  const [pwInput, setPwInput] = useState('')
-  const [pwError, setPwError] = useState(false)
-  const [showPw, setShowPw] = useState(false)
 
-  const handleLogin = (e) => {
-    e.preventDefault()
-    if (pwInput === ADMIN_PASSWORD) {
-      sessionStorage.setItem('admin_authed', 'true')
-      onSuccess()
-    } else {
-      setPwError(true)
-      setPwInput('')
-      setTimeout(() => setPwError(false), 3000)
-    }
-  }
-
-  return (
-    <div className="min-h-screen bg-[#FAFAF8] flex items-center justify-center px-4">
-      <div className="w-full max-w-sm bg-white rounded-2xl border border-gray-100 shadow-md p-8">
-        {/* Icon */}
-        <div className="flex flex-col items-center mb-6">
-          <div className="w-14 h-14 rounded-full bg-[#2D6A4F] flex items-center justify-center mb-3">
-            <Lock size={24} className="text-white" />
-          </div>
-          <h1 className="text-xl font-semibold text-[#1A1A2E]">Admin Access</h1>
-          <p className="text-sm text-[#6B7280] mt-1 text-center">
-            Dr. Zainab Mohsin — Booking Management
-          </p>
-        </div>
-
-        <form onSubmit={handleLogin} className="flex flex-col gap-4">
-          <div className="relative">
-            <input
-              id="admin-pw"
-              type={showPw ? 'text' : 'password'}
-              value={pwInput}
-              onChange={(e) => setPwInput(e.target.value)}
-              placeholder="Enter admin password"
-              autoComplete="current-password"
-              className={`w-full border rounded-xl px-4 py-3 pr-11 text-sm text-[#1A1A2E] outline-none focus:ring-2 focus:ring-[#52B788] transition-all ${
-                pwError ? 'animate-bounce border-red-400 focus:ring-red-300' : 'border-gray-200'
-              }`}
-            />
-            <button
-              type="button"
-              tabIndex={-1}
-              onClick={() => setShowPw(v => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#2D6A4F]"
-            >
-              {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
-            </button>
-          </div>
-
-          {pwError && (
-            <p className="text-red-500 text-sm -mt-2 text-center">
-              Incorrect password. Try again.
-            </p>
-          )}
-
-          <button
-            type="submit"
-            className="w-full bg-[#2D6A4F] text-white py-3 rounded-xl font-semibold text-sm hover:bg-[#245c43] transition-colors"
-          >
-            Enter Dashboard
-          </button>
-        </form>
-      </div>
-    </div>
-  )
-}
 
 // ═══════════════════════════════════════════════════════════════
 // MAIN ADMIN DASHBOARD
@@ -313,7 +239,14 @@ export default function Admin() {
   const consultCount = consultationBookings.length
 
   // ── Not authed → login screen ───────────────────────────────
-  if (!authed) return <LoginScreen onSuccess={() => setAuthed(true)} />
+  if (!authed) return (
+    <AdminLogin
+      password={ADMIN_PASSWORD}
+      onSuccess={() => { sessionStorage.setItem('admin_authed', 'true'); setAuthed(true) }}
+      title="Admin Access"
+      subtitle="Dr. Zainab Mohsin — Booking Management"
+    />
+  )
 
   // ── Dashboard ───────────────────────────────────────────────
   return (

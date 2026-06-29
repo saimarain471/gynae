@@ -2,9 +2,11 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
-import { z } from 'zod'
 import { supabase } from '../lib/supabase'
 import { posthog } from '../lib/posthog'
+import { personalDetailsSchema, consultationPaymentSchema, validateStep } from '../lib/validators'
+import { buildConsultationWhatsappLink, copyToClipboard } from '../lib/utils'
+import { PAYMENT_ACCOUNTS } from '../lib/constants'
 import {
   Video, Clock, MessageCircle, FileText, Heart,
   ShieldCheck, CreditCard, Copy, Check, GraduationCap,
@@ -12,23 +14,6 @@ import {
   Hash, ChevronRight, CheckCircle2, Lock, Loader2,
   Star, Sun, Moon, Cloud, Home,
 } from 'lucide-react'
-
-const stepOneSchema = z.object({
-  fullName: z.string().min(3, 'Please enter your full name.'),
-  email: z.string().email('Please enter a valid email address.'),
-  phone: z.string().min(10, 'Please enter your phone number.'),
-  whatsappNumber: z.string().min(10, 'Please enter your WhatsApp number.'),
-  city: z.string().min(2, 'Please enter your city.'),
-})
-
-const stepTwoSchema = z.object({
-  preferredDate: z.string().min(1, 'Please select a preferred date.'),
-  preferredTimeSlot: z.string().min(1, 'Please select a time slot.'),
-  concern: z.string().min(20, 'Please describe your concern in at least 20 characters.'),
-  paymentMethod: z.string().min(1, 'Please select a payment method.'),
-  transactionId: z.string().min(3, 'Please enter your transaction ID.'),
-  additionalNotes: z.string().optional(),
-})
 
 export default function Booking() {
   const [step, setStep] = useState(1)
@@ -67,44 +52,26 @@ export default function Booking() {
   const paymentMethod = watch('paymentMethod')
   const minDate = new Date().toISOString().split('T')[0]
 
-  const handleCopy = (text, id) => {
-    navigator.clipboard.writeText(text)
-    setCopiedId(id)
-    setTimeout(() => setCopiedId(null), 2000)
+  const handleCopy = async (text, id) => {
+    const ok = await copyToClipboard(text)
+    if (ok) {
+      setCopiedId(id)
+      setTimeout(() => setCopiedId(null), 2000)
+    }
   }
 
   const handleNext = () => {
     const values = getValues()
-    const result = stepOneSchema.safeParse(values)
-
-    if (!result.success) {
-      const fieldErrors = result.error.flatten().fieldErrors
-      Object.entries(fieldErrors).forEach(([field, messages]) => {
-        setError(field, { type: 'validation', message: messages?.[0] ?? 'Invalid value' })
-      })
-      return
-    }
-
+    if (!validateStep(personalDetailsSchema, values, setError)) return
     clearErrors()
     setStep(2)
-  }
-
-  const buildWhatsappLink = (data) => {
-    const phone = import.meta.env.VITE_WHATSAPP_NUMBER || '03314896544'
-    const message = `Assalam o Alaikum Dr. Zainab! I have booked a consultation and sent payment via ${data.paymentMethod}. My Transaction ID is ${data.transactionId}. Preferred: ${data.preferredDate} (${data.preferredTimeSlot}). My name is ${data.fullName}.`
-    return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
   }
 
   const onSubmit = async (values) => {
     setSubmitError('')
     setStatus('submitting')
 
-    const result = stepTwoSchema.safeParse(values)
-    if (!result.success) {
-      const fieldErrors = result.error.flatten().fieldErrors
-      Object.entries(fieldErrors).forEach(([field, messages]) => {
-        setError(field, { type: 'validation', message: messages?.[0] ?? 'Invalid value' })
-      })
+    if (!validateStep(consultationPaymentSchema, values, setError)) {
       setStatus('idle')
       return
     }
@@ -138,7 +105,7 @@ export default function Booking() {
     })
 
     setSubmittedData(values)
-    setWhatsappUrl(buildWhatsappLink(values))
+    setWhatsappUrl(buildConsultationWhatsappLink(values))
     setStatus('success')
   }
 
@@ -382,63 +349,26 @@ export default function Booking() {
 
               {/* Payment methods */}
               <div className="flex flex-col gap-2">
-                {/* JazzCash */}
-                <div className="flex items-center justify-between rounded-xl border border-gray-100 bg-white px-4 py-3">
-                  <div>
-                    <p className="text-sm font-medium text-[#1A1A2E]">JazzCash</p>
-                    <p className="font-mono text-xs text-[#6B7280]">0300-0000000</p>
+                {Object.entries(PAYMENT_ACCOUNTS).map(([key, account]) => (
+                  <div key={key} className="flex items-center justify-between rounded-xl border border-gray-100 bg-white px-4 py-3">
+                    <div>
+                      <p className="text-sm font-medium text-[#1A1A2E]">{account.label}</p>
+                      {key === 'Bank Transfer' && <p className="text-xs text-[#6B7280]">{account.holder}</p>}
+                      <p className="font-mono text-xs text-[#6B7280]">{account.number}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleCopy(account.number, key)}
+                      className="text-[#6B7280] hover:text-[#2D6A4F] transition flex-shrink-0"
+                    >
+                      {copiedId === key ? (
+                        <Check size={13} className="text-green-600" />
+                      ) : (
+                        <Copy size={13} />
+                      )}
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleCopy('0300-0000000', 'jazzcash')}
-                    className="text-[#6B7280] hover:text-[#2D6A4F] transition"
-                  >
-                    {copiedId === 'jazzcash' ? (
-                      <Check size={13} className="text-green-600" />
-                    ) : (
-                      <Copy size={13} />
-                    )}
-                  </button>
-                </div>
-
-                {/* EasyPaisa */}
-                <div className="flex items-center justify-between rounded-xl border border-gray-100 bg-white px-4 py-3">
-                  <div>
-                    <p className="text-sm font-medium text-[#1A1A2E]">EasyPaisa</p>
-                    <p className="font-mono text-xs text-[#6B7280]">0301-0000000</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleCopy('0301-0000000', 'easypaisa')}
-                    className="text-[#6B7280] hover:text-[#2D6A4F] transition"
-                  >
-                    {copiedId === 'easypaisa' ? (
-                      <Check size={13} className="text-green-600" />
-                    ) : (
-                      <Copy size={13} />
-                    )}
-                  </button>
-                </div>
-
-                {/* Bank Transfer */}
-                <div className="flex items-center justify-between rounded-xl border border-gray-100 bg-white px-4 py-3">
-                  <div>
-                    <p className="text-sm font-medium text-[#1A1A2E]">HBL Bank</p>
-                    <p className="text-xs text-[#6B7280]">Dr. Zainab Mohsin</p>
-                    <p className="font-mono text-xs text-[#6B7280]">PK00HABB0000001234567890</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleCopy('PK00HABB0000001234567890', 'bank')}
-                    className="text-[#6B7280] hover:text-[#2D6A4F] transition flex-shrink-0"
-                  >
-                    {copiedId === 'bank' ? (
-                      <Check size={13} className="text-green-600" />
-                    ) : (
-                      <Copy size={13} />
-                    )}
-                  </button>
-                </div>
+                ))}
               </div>
 
               {/* Info box */}

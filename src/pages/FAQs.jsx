@@ -1,9 +1,11 @@
-import { useState, useEffect, useCallback } from 'react'
-import { Link } from 'react-router-dom'
-import { Search, HelpCircle, ArrowRight, Sparkles } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Search, HelpCircle } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { posthog } from '../lib/posthog'
 import FAQAccordion from '../components/FAQAccordion'
+import CategoryFilterBar from '../components/CategoryFilterBar'
+import EmptyState from '../components/EmptyState'
+import CTABanner from '../components/CTABanner'
 
 const CATEGORIES = ['All', 'Appointments', 'Pregnancy', 'Baby Care', 'Postnatal', 'General']
 
@@ -114,25 +116,11 @@ export default function FAQs() {
 
       {/* Category filter */}
       {!searchQuery && (
-        <div className="sticky top-16 z-30 bg-[#FAFAF8] border-b border-gray-100 shadow-sm">
-          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            <div className="flex gap-2 overflow-x-auto py-3 no-scrollbar">
-              {CATEGORIES.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => { setActiveCategory(cat); setOpenId(null) }}
-                  className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium cursor-pointer transition-colors ${
-                    activeCategory === cat
-                      ? 'bg-[#2D6A4F] text-white shadow-sm'
-                      : 'bg-white text-[#6B7280] border border-gray-200 hover:border-[#52B788]'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+        <CategoryFilterBar
+          categories={CATEGORIES}
+          active={activeCategory}
+          onChange={(cat) => { setActiveCategory(cat); setOpenId(null) }}
+        />
       )}
 
       {/* FAQ content */}
@@ -147,19 +135,13 @@ export default function FAQs() {
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-center gap-3">
-            <div className="w-16 h-16 rounded-full bg-[#E1F5EE] flex items-center justify-center mb-2">
-              <Search size={28} className="text-[#52B788]" />
-            </div>
-            <p className="text-[#1A1A2E] font-semibold text-lg">No questions found</p>
-            <p className="text-[#6B7280] text-sm">Try different keywords or browse all categories</p>
-            <button
-              onClick={() => { setSearchQuery(''); setActiveCategory('All') }}
-              className="mt-2 text-[#2D6A4F] text-sm font-medium underline underline-offset-2"
-            >
-              Clear filters
-            </button>
-          </div>
+          <EmptyState
+            icon={<Search size={28} className="text-[#52B788]" />}
+            title="No questions found"
+            subtitle="Try different keywords or browse all categories"
+            actionLabel="Clear filters"
+            onAction={() => { setSearchQuery(''); setActiveCategory('All') }}
+          />
         ) : (
           <div className="space-y-8">
             {searchQuery && (
@@ -191,25 +173,12 @@ export default function FAQs() {
       </main>
 
       {/* CTA */}
-      <section className="bg-[#2D6A4F] py-12 mt-4">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div>
-            <p className="text-white font-['Playfair_Display'] text-xl md:text-2xl font-bold">
-              Still have questions?
-            </p>
-            <p className="text-[#B7E4C7] text-sm mt-1">
-              Ask Dr. Zainab directly in a private consultation.
-            </p>
-          </div>
-          <Link
-            to="/booking"
-            className="flex-shrink-0 flex items-center gap-2 bg-white text-[#2D6A4F] font-semibold px-6 py-3 rounded-xl hover:bg-[#E1F5EE] transition-colors text-sm"
-          >
-            Book Consultation
-            <ArrowRight size={16} />
-          </Link>
-        </div>
-      </section>
+      <CTABanner
+        title="Still have questions?"
+        subtitle="Ask Dr. Zainab directly in a private consultation."
+        linkTo="/booking"
+        linkLabel="Book Consultation"
+      />
     </div>
   )
 }
