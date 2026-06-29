@@ -215,8 +215,12 @@ export default function Admin() {
   const [error, setError] = useState(null)
   const [lastUpdated, setLastUpdated] = useState(null)
 
-  // Stats
-  const [stats, setStats] = useState({ total: 0, pending: 0, verified: 0, today: 0 })
+  // Stats are derived from the booking lists so they can never drift
+  // out of sync with the data.
+  const stats = useMemo(
+    () => computeStats([...classBookings, ...consultationBookings]),
+    [classBookings, consultationBookings]
+  )
 
   // Filters
   const [activeTab, setActiveTab] = useState('all')
@@ -250,8 +254,6 @@ export default function Admin() {
       setClassBookings(taggedClasses)
       setConsultationBookings(taggedConsults)
 
-      setStats(computeStats([...taggedClasses, ...taggedConsults]))
-
       setLastUpdated(
         new Date().toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' })
       )
@@ -272,15 +274,11 @@ export default function Admin() {
       return
     }
 
-    const apply = list => list.map(b => b.id === bookingId ? { ...b, status: newStatus } : b)
-    const nextClass = bookingType === 'class' ? apply(classBookings) : classBookings
-    const nextConsult = bookingType === 'class' ? consultationBookings : apply(consultationBookings)
-
-    if (bookingType === 'class') setClassBookings(nextClass)
-    else setConsultationBookings(nextConsult)
-
-    // Recompute stats from the updated data to avoid drift.
-    setStats(computeStats([...nextClass, ...nextConsult]))
+    // Use functional updaters so concurrent status changes don't clobber
+    // each other via a stale closure. Stats derive from these lists.
+    const updater = list => list.map(b => b.id === bookingId ? { ...b, status: newStatus } : b)
+    if (bookingType === 'class') setClassBookings(updater)
+    else setConsultationBookings(updater)
   }
 
   const handleLogout = () => {
