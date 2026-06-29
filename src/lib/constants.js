@@ -8,11 +8,12 @@ export const PAYMENT_ACCOUNTS = {
   'Bank Transfer': { label: 'HBL Bank', number: 'PK00HABB0000001234567890', holder: 'Dr. Zainab Mohsin' },
 }
 
-export const PAYMENT_INFO_MAP = {
-  JazzCash: 'JazzCash: 0300-0000000 (Zainab Mohsin)',
-  EasyPaisa: 'EasyPaisa: 0301-0000000 (Zainab Mohsin)',
-  'Bank Transfer': 'HBL: PK00HABB0000001234567890 (Dr. Zainab Mohsin)',
-}
+export const PAYMENT_INFO_MAP = Object.fromEntries(
+  Object.entries(PAYMENT_ACCOUNTS).map(([key, { label, number, holder }]) => [
+    key,
+    `${label}: ${number} (${holder})`,
+  ])
+)
 
 export const PAYMENT_METHODS = ['JazzCash', 'EasyPaisa', 'Bank Transfer']
 
