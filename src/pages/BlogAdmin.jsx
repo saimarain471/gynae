@@ -76,7 +76,7 @@ function LoginCard({ onSuccess }) {
               {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
-          {!passwordConfigured && <p className="text-red-500 text-xs -mt-2">Admin password is not configured. Set VITE_BLOG_ADMIN_PASSWORD.</p>}
+          {!passwordConfigured && <p className="text-red-500 text-xs -mt-2">Admin access is not configured. Contact the site administrator.</p>}
           {error && <p className="text-red-500 text-xs -mt-2">Incorrect password. Please try again.</p>}
           <button type="submit" className="bg-[#2D6A4F] text-white rounded-xl py-3 text-sm font-semibold hover:bg-[#245c43] transition-colors">
             Enter Admin Panel

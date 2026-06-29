@@ -167,7 +167,7 @@ function LoginScreen({ onSuccess }) {
 
           {!passwordConfigured && (
             <p className="text-red-500 text-sm -mt-2 text-center">
-              Admin password is not configured. Set VITE_ADMIN_PASSWORD.
+              Admin access is not configured. Contact the site administrator.
             </p>
           )}
 
