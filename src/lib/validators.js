@@ -15,7 +15,7 @@ export const personalDetailsSchema = z.object({
  * Step 2: Payment details schema for class bookings.
  */
 export const classPaymentSchema = z.object({
-  paymentMethod: z.enum(['JazzCash', 'EasyPaisa', 'Bank Transfer'], 'Please select a payment method.'),
+  paymentMethod: z.enum(['JazzCash', 'EasyPaisa', 'Bank Transfer'], { message: 'Please select a payment method.' }),
   transactionId: z.string().min(3, 'Please enter your transaction ID.'),
   additionalNotes: z.string().optional(),
 })
