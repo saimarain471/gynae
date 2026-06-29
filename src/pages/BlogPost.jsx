@@ -64,17 +64,21 @@ export default function BlogPost() {
       }
       meta.setAttribute('content', post.excerpt || '')
 
-      // Track PostHog event
+      // Track PostHog event. Read everything off `post` (not the URL
+      // slug) so the event can't pair a new slug with stale metadata.
       posthog.capture('blog_post_viewed', {
-        slug,
+        slug: post.slug,
         title: post.title,
         category: post.category,
       })
     }
-  }, [post, slug])
+  }, [post])
 
   const fetchPost = async () => {
     setLoading(true)
+    // Clear the previous article so its content/SEO/analytics don't
+    // briefly apply to the new slug while the fetch is in flight.
+    setPost(null)
 
     const { data: postData, error } = await supabase
       .from('blog_posts')

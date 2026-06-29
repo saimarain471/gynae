@@ -13,7 +13,7 @@ import {
 // with Supabase Row Level Security / Auth. Set VITE_ADMIN_PASSWORD
 // in your environment (shared with the bookings Admin panel).
 // ─────────────────────────────────────────────────────────────
-const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'zainab2025'
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'DrZainab@2025'
 
 const BLOG_CATEGORIES = ['Prenatal', 'Postnatal', 'Baby Care', 'General']
 const FAQ_CATEGORIES = ['Appointments', 'Pregnancy', 'Baby Care', 'Postnatal', 'General']
