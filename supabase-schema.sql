@@ -1,4 +1,8 @@
 -- Supabase SQL schema for Dr. Zainab Mohsin website
+--
+-- NOTE: The admin dashboard requires a service_role key or authenticated user
+-- to read/update/delete bookings. The anon role can only insert new bookings.
+-- Grant additional policies for the authenticated role as needed.
 
 -- ── Class bookings ─────────────────────────────────────────────
 create table if not exists class_bookings (

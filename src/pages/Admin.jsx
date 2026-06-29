@@ -113,8 +113,11 @@ function LoginScreen({ onSuccess }) {
   const [pwError, setPwError] = useState(false)
   const [showPw, setShowPw] = useState(false)
 
+  const passwordConfigured = ADMIN_PASSWORD.length > 0
+
   const handleLogin = (e) => {
     e.preventDefault()
+    if (!passwordConfigured) return
     if (pwInput === ADMIN_PASSWORD) {
       sessionStorage.setItem('admin_authed', 'true')
       onSuccess()
@@ -161,6 +164,12 @@ function LoginScreen({ onSuccess }) {
               {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
+
+          {!passwordConfigured && (
+            <p className="text-red-500 text-sm -mt-2 text-center">
+              Admin password is not configured. Set VITE_ADMIN_PASSWORD.
+            </p>
+          )}
 
           {pwError && (
             <p className="text-red-500 text-sm -mt-2 text-center">
