@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { supabase } from '../lib/supabase'
 import { posthog } from '../lib/posthog'
-import { toWhatsAppNumber } from '../lib/phone'
+import { toWhatsAppNumber, PHONE_REGEX } from '../lib/phone'
 import {
   Video, Clock, MessageCircle, FileText, Heart,
   ShieldCheck, CreditCard, Copy, Check, GraduationCap,
@@ -16,7 +16,7 @@ import {
 const phoneSchema = z
   .string()
   .min(10, 'Please enter a valid phone number.')
-  .regex(/^[+]?[0-9\s-]{10,15}$/, 'Please enter a valid phone number (digits only).')
+  .regex(PHONE_REGEX, 'Please enter a valid phone number (digits only).')
 
 const stepOneSchema = z.object({
   fullName: z.string().min(3, 'Please enter your full name.'),
