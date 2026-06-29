@@ -16,6 +16,7 @@ import BlogPost from './pages/BlogPost'
 import BlogAdmin from './pages/BlogAdmin'
 import FAQs from './pages/FAQs'
 import Testimonials from './pages/Testimonials'
+import Admin from './pages/Admin'
 import { posthog } from './lib/posthog'
 
 function ScrollToTop() {
@@ -50,6 +51,7 @@ export default function App() {
           <Route path="/blog" element={<Blog />} />
           <Route path="/faqs" element={<FAQs />} />
           <Route path="/testimonials" element={<Testimonials />} />
+          <Route path="/admin" element={<Admin />} />
           <Route path="*" element={<Home />} />
         </Routes>
         <Footer />
