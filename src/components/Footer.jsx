@@ -24,6 +24,8 @@ export default function Footer() {
             <Link to="/about" className="hover:text-primary">About</Link>
             <Link to="/classes" className="hover:text-primary">Classes</Link>
             <Link to="/blog" className="hover:text-primary">Health Tips</Link>
+            <Link to="/faqs" className="hover:text-primary">FAQs</Link>
+            <Link to="/testimonials" className="hover:text-primary">Patient Reviews</Link>
             <Link to="/booking" className="hover:text-primary">Book Consultation</Link>
           </div>
         </div>

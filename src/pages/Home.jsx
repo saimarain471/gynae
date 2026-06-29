@@ -1,10 +1,14 @@
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import HeroSection from '../components/HeroSection'
 import ClassCard from '../components/ClassCard'
 import TestimonialCard from '../components/TestimonialCard'
+import FAQAccordion from '../components/FAQAccordion'
 import { classes } from '../data/classes'
 import { posthog } from '../lib/posthog'
+import { supabase } from '../lib/supabase'
+import { Star, HelpCircle, ArrowRight } from 'lucide-react'
 
 const stats = [
   { label: 'Mothers Trained', value: '500+' },
@@ -12,17 +16,54 @@ const stats = [
   { label: 'Average Rating', value: '4.9★' },
 ]
 
-const testimonials = [
-  { name: 'Ayesha Khan', title: 'New Mother', quote: 'The classes gave me confidence and helped me prepare for my first baby.' },
-  { name: 'Sara Malik', title: 'Expecting Mother', quote: 'Dr. Zainub explained every step gently and clearly. Highly recommended.' },
-  { name: 'Fatima Raza', title: 'Postpartum Mom', quote: 'The baby care tips were practical and comforting for a new mother.' },
-]
-
 export default function Home() {
+  const [featuredTestimonials, setFeaturedTestimonials] = useState([])
+  const [topFaqs, setTopFaqs] = useState([])
+  const [openFaqId, setOpenFaqId] = useState(null)
+
+  useEffect(() => {
+    fetchFeaturedTestimonials()
+    fetchTopFaqs()
+  }, [])
+
+  const fetchFeaturedTestimonials = async () => {
+    const { data } = await supabase
+      .from('testimonials')
+      .select('*')
+      .eq('approved', true)
+      .eq('featured', true)
+      .order('created_at', { ascending: false })
+      .limit(3)
+
+    if (data && data.length > 0) {
+      setFeaturedTestimonials(data)
+    } else {
+      // Fallback: grab latest approved (not necessarily featured)
+      const { data: fallback } = await supabase
+        .from('testimonials')
+        .select('*')
+        .eq('approved', true)
+        .order('created_at', { ascending: false })
+        .limit(3)
+      setFeaturedTestimonials(fallback || [])
+    }
+  }
+
+  const fetchTopFaqs = async () => {
+    const { data } = await supabase
+      .from('faqs')
+      .select('*')
+      .eq('published', true)
+      .order('sort_order', { ascending: true })
+      .limit(5)
+    setTopFaqs(data || [])
+  }
+
   return (
     <main className="space-y-16">
       <HeroSection />
 
+      {/* Stats */}
       <section className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="grid gap-6 rounded-[2rem] bg-white px-6 py-10 shadow-sm md:grid-cols-3 md:px-10">
           {stats.map((stat) => (
@@ -34,6 +75,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* How it works */}
       <section className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
           <div>
@@ -54,6 +96,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Featured Classes */}
       <section className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
@@ -71,14 +114,68 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="grid gap-6 lg:grid-cols-3">
-          {testimonials.map((testimonial) => (
-            <TestimonialCard key={testimonial.name} {...testimonial} />
-          ))}
-        </div>
-      </section>
+      {/* Testimonials — from Supabase if available, else nothing */}
+      {featuredTestimonials.length > 0 && (
+        <section className="bg-white py-16">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="inline-flex items-center gap-1.5 bg-[#E1F5EE] text-[#2D6A4F] text-xs font-semibold px-3 py-1 rounded-full">
+                <Star size={12} fill="#2D6A4F" />
+                Patient Stories
+              </span>
+            </div>
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
+              <h2 className="font-['Playfair_Display'] text-2xl md:text-3xl font-semibold text-[#1A1A2E]">
+                Trusted by Mothers Across Pakistan
+              </h2>
+              <Link to="/testimonials" className="flex items-center gap-1 text-sm font-semibold text-[#2D6A4F] hover:text-[#245c43] flex-shrink-0">
+                Read all reviews <ArrowRight size={14} />
+              </Link>
+            </div>
+            <div className="grid gap-5 md:grid-cols-3">
+              {featuredTestimonials.map((t) => (
+                <TestimonialCard key={t.id} {...t} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
+      {/* FAQ preview — from Supabase */}
+      {topFaqs.length > 0 && (
+        <section className="bg-white py-16 border-t border-gray-100">
+          <div className="mx-auto max-w-3xl px-6 lg:px-8">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="inline-flex items-center gap-1.5 bg-[#E1F5EE] text-[#2D6A4F] text-xs font-semibold px-3 py-1 rounded-full">
+                <HelpCircle size={12} />
+                Common Questions
+              </span>
+            </div>
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
+              <h2 className="font-['Playfair_Display'] text-2xl md:text-3xl font-semibold text-[#1A1A2E]">
+                Common Questions
+              </h2>
+              <Link to="/faqs" className="flex items-center gap-1 text-sm font-semibold text-[#2D6A4F] hover:text-[#245c43] flex-shrink-0">
+                See all questions <ArrowRight size={14} />
+              </Link>
+            </div>
+            <p className="text-[#6B7280] text-sm mb-6">Quick answers to what most mothers ask first.</p>
+            <div className="bg-[#FAFAF8] rounded-2xl border border-gray-100 px-5">
+              {topFaqs.map((faq) => (
+                <FAQAccordion
+                  key={faq.id}
+                  question={faq.question}
+                  answer={faq.answer}
+                  isOpen={openFaqId === faq.id}
+                  onToggle={() => setOpenFaqId((prev) => (prev === faq.id ? null : faq.id))}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* CTA */}
       <section className="mx-auto max-w-7xl rounded-[2rem] bg-primary/5 px-6 py-12 text-center shadow-sm lg:px-12">
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-secondary">Consultation</p>
         <h2 className="mt-4 text-3xl font-semibold text-text">Book a 1-on-1 with Dr. Zainub — PKR 2,000</h2>
