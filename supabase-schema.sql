@@ -34,6 +34,16 @@ create policy "Deny public read on class bookings"
   to anon
   using (false);
 
+create policy "Deny public update on class bookings"
+  on class_bookings for update
+  to anon
+  using (false);
+
+create policy "Deny public delete on class bookings"
+  on class_bookings for delete
+  to anon
+  using (false);
+
 create policy "Allow authenticated full access to class bookings"
   on class_bookings for all
   to authenticated
@@ -67,6 +77,16 @@ create policy "Allow public to insert consultation bookings"
 
 create policy "Deny public read on consultation bookings"
   on consultation_bookings for select
+  to anon
+  using (false);
+
+create policy "Deny public update on consultation bookings"
+  on consultation_bookings for update
+  to anon
+  using (false);
+
+create policy "Deny public delete on consultation bookings"
+  on consultation_bookings for delete
   to anon
   using (false);
 
