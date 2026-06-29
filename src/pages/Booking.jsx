@@ -67,10 +67,15 @@ export default function Booking() {
   const paymentMethod = watch('paymentMethod')
   const minDate = new Date().toISOString().split('T')[0]
 
-  const handleCopy = (text, id) => {
-    navigator.clipboard.writeText(text)
-    setCopiedId(id)
-    setTimeout(() => setCopiedId(null), 2000)
+  const handleCopy = async (text, id) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopiedId(id)
+      setTimeout(() => setCopiedId(null), 2000)
+    } catch (err) {
+      console.error('Failed to copy to clipboard:', err)
+      window.prompt('Copy this value:', text)
+    }
   }
 
   const handleNext = () => {

@@ -92,6 +92,9 @@ export default function BlogPost() {
       .from('blog_posts')
       .update({ views: (postData.views || 0) + 1 })
       .eq('id', postData.id)
+      .then(({ error: viewErr }) => {
+        if (viewErr) console.error('Failed to update view count:', viewErr)
+      })
 
     // Fetch related posts
     const { data: related } = await supabase
@@ -119,8 +122,9 @@ export default function BlogPost() {
       await navigator.clipboard.writeText(window.location.href)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
-    } catch {
-      // fallback: select the url
+    } catch (err) {
+      console.error('Failed to copy link to clipboard:', err)
+      window.prompt('Copy this link:', window.location.href)
     }
   }
 

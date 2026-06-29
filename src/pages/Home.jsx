@@ -27,7 +27,7 @@ export default function Home() {
   }, [])
 
   const fetchFeaturedTestimonials = async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('testimonials')
       .select('*')
       .eq('approved', true)
@@ -35,27 +35,40 @@ export default function Home() {
       .order('created_at', { ascending: false })
       .limit(3)
 
+    if (error) {
+      console.error('Failed to fetch featured testimonials:', error)
+      return
+    }
+
     if (data && data.length > 0) {
       setFeaturedTestimonials(data)
     } else {
       // Fallback: grab latest approved (not necessarily featured)
-      const { data: fallback } = await supabase
+      const { data: fallback, error: fallbackError } = await supabase
         .from('testimonials')
         .select('*')
         .eq('approved', true)
         .order('created_at', { ascending: false })
         .limit(3)
+      if (fallbackError) {
+        console.error('Failed to fetch fallback testimonials:', fallbackError)
+        return
+      }
       setFeaturedTestimonials(fallback || [])
     }
   }
 
   const fetchTopFaqs = async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('faqs')
       .select('*')
       .eq('published', true)
       .order('sort_order', { ascending: true })
       .limit(5)
+    if (error) {
+      console.error('Failed to fetch FAQs:', error)
+      return
+    }
     setTopFaqs(data || [])
   }
 
