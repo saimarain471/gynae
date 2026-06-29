@@ -210,9 +210,9 @@ export default function Admin() {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
 
-  // Check session on mount
+  // Check session on mount (only if password is configured)
   useEffect(() => {
-    if (sessionStorage.getItem('admin_authed') === 'true') setAuthed(true)
+    if (ADMIN_PASSWORD && sessionStorage.getItem('admin_authed') === 'true') setAuthed(true)
   }, [])
 
   useEffect(() => {
