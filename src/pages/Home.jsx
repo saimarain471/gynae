@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import HeroSection from '../components/HeroSection'
 import ClassCard from '../components/ClassCard'
 import TestimonialCard from '../components/TestimonialCard'
 import FAQAccordion from '../components/FAQAccordion'
 import { classes } from '../data/classes'
-import { posthog } from '../lib/posthog'
 import { supabase } from '../lib/supabase'
 import { Star, HelpCircle, ArrowRight } from 'lucide-react'
 
@@ -21,12 +19,7 @@ export default function Home() {
   const [topFaqs, setTopFaqs] = useState([])
   const [openFaqId, setOpenFaqId] = useState(null)
 
-  useEffect(() => {
-    fetchFeaturedTestimonials()
-    fetchTopFaqs()
-  }, [])
-
-  const fetchFeaturedTestimonials = async () => {
+  async function fetchFeaturedTestimonials() {
     const { data } = await supabase
       .from('testimonials')
       .select('*')
@@ -49,7 +42,7 @@ export default function Home() {
     }
   }
 
-  const fetchTopFaqs = async () => {
+  async function fetchTopFaqs() {
     const { data } = await supabase
       .from('faqs')
       .select('*')
@@ -58,6 +51,14 @@ export default function Home() {
       .limit(5)
     setTopFaqs(data || [])
   }
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      fetchFeaturedTestimonials()
+      fetchTopFaqs()
+    }, 0)
+    return () => window.clearTimeout(timer)
+  }, [])
 
   return (
     <main className="space-y-16">

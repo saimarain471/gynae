@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { supabase } from '../lib/supabase'
-import StarRating from '../components/StarRating'
 import {
   Lock, LogOut, PenSquare, Eye, EyeOff, Trash2,
   ToggleLeft, ToggleRight, CheckCircle, XCircle,
@@ -13,7 +12,7 @@ import {
 // This is a temporary hardcoded password for admin access.
 // For production, use Supabase Auth or environment variable.
 // ─────────────────────────────────────────────────────────────
-const ADMIN_PASSWORD = 'zainab2025'
+const ADMIN_PASSWORD = import.meta.env.VITE_CONTENT_ADMIN_PASSWORD || import.meta.env.VITE_ADMIN_PASSWORD || ''
 
 const BLOG_CATEGORIES = ['Prenatal', 'Postnatal', 'Baby Care', 'General']
 const FAQ_CATEGORIES = ['Appointments', 'Pregnancy', 'Baby Care', 'Postnatal', 'General']
@@ -24,6 +23,14 @@ const EMPTY_BLOG_FORM = {
 }
 const EMPTY_FAQ_FORM = {
   question: '', answer: '', category: 'Appointments', sortOrder: 0,
+}
+
+function slugify(value) {
+  return value.toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
 }
 
 // ── Toast ──────────────────────────────────────────────────────
@@ -48,7 +55,7 @@ function LoginCard({ onSuccess }) {
 
   const handleLogin = (e) => {
     e.preventDefault()
-    if (pw === ADMIN_PASSWORD) onSuccess()
+    if (ADMIN_PASSWORD && pw === ADMIN_PASSWORD) onSuccess()
     else { setError(true); setPw('') }
   }
 
@@ -99,16 +106,9 @@ function BlogTab({ showToast }) {
   const [loadingPosts, setLoadingPosts] = useState(false)
   const formRef = useRef(null)
 
-  useEffect(() => {
-    if (slugManuallyEdited) return
-    const generated = form.title.toLowerCase()
-      .replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '')
-    setForm(prev => ({ ...prev, slug: generated }))
-  }, [form.title, slugManuallyEdited])
-
   useEffect(() => { fetchAllPosts() }, [])
 
-  const fetchAllPosts = async () => {
+  async function fetchAllPosts() {
     setLoadingPosts(true)
     const { data } = await supabase.from('blog_posts')
       .select('id, title, slug, published, created_at, views, category')
@@ -119,7 +119,11 @@ function BlogTab({ showToast }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target
-    setForm(prev => ({ ...prev, [name]: value }))
+    setForm(prev => ({
+      ...prev,
+      [name]: value,
+      ...(name === 'title' && !slugManuallyEdited ? { slug: slugify(value) } : {}),
+    }))
   }
 
   const handleSubmit = async (published) => {
@@ -320,7 +324,7 @@ function FAQsTab({ showToast }) {
 
   useEffect(() => { fetchFaqs() }, [])
 
-  const fetchFaqs = async () => {
+  async function fetchFaqs() {
     setLoading(true)
     const { data } = await supabase.from('faqs').select('*').order('sort_order', { ascending: true })
     setFaqs(data || [])
@@ -470,7 +474,7 @@ function ReviewsTab({ showToast }) {
 
   useEffect(() => { fetchReviews() }, [])
 
-  const fetchReviews = async () => {
+  async function fetchReviews() {
     setLoading(true)
     const { data } = await supabase.from('testimonials').select('*').order('created_at', { ascending: false })
     setReviews(data || [])

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Smartphone, Wallet, Landmark, Copy, Check, ChevronDown, ChevronUp } from 'lucide-react'
+import { Smartphone, Wallet, Landmark, Copy, ChevronDown, ChevronUp } from 'lucide-react'
 import { posthog } from '../lib/posthog'
 
 const paymentOptions = [

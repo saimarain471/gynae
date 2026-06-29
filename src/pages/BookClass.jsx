@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import { ShieldCheck, Check, CheckCircle2 } from 'lucide-react'
 import { classes } from '../data/classes'
 import { supabase } from '../lib/supabase'
 import { posthog } from '../lib/posthog'
+import { buildWhatsAppUrl } from '../lib/whatsapp'
 import PaymentInstructions from '../components/PaymentInstructions'
 
 const stepOneSchema = z.object({
@@ -35,17 +36,17 @@ export default function BookClass() {
   const {
     register,
     handleSubmit,
-    watch,
     getValues,
     setError,
     clearErrors,
+    control,
     formState: { errors, isSubmitting },
   } = useForm({
     mode: 'onChange',
     defaultValues: { paymentMethod: '' },
   })
 
-  const paymentMethod = watch('paymentMethod')
+  const paymentMethod = useWatch({ control, name: 'paymentMethod' })
 
   useEffect(() => {
     const timer = setTimeout(() => setFormReady(true), 600)
@@ -101,9 +102,8 @@ export default function BookClass() {
   }
 
   const buildWhatsappLink = ({ fullName, paymentMethod, transactionId }) => {
-    const phone = import.meta.env.VITE_WHATSAPP_NUMBER || '03314896544'
     const message = `Assalam o Alaikum Dr. Zainub! I have enrolled in ${classData.title} and sent payment via ${paymentMethod}. My Transaction ID is ${transactionId}. My name is ${fullName}.`
-    return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
+    return buildWhatsAppUrl(message)
   }
 
   const onSubmit = async (values) => {

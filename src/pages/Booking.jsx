@@ -1,15 +1,16 @@
 // Booking.jsx — redesigned consultation booking page
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import { supabase } from '../lib/supabase'
 import { posthog } from '../lib/posthog'
+import { buildWhatsAppUrl } from '../lib/whatsapp'
 import {
   Video, Clock, MessageCircle, FileText, Heart,
   ShieldCheck, CreditCard, Copy, Check, GraduationCap,
-  Award, Users, User, Mail, Phone, MapPin, Calendar,
-  Hash, ChevronRight, CheckCircle2, Lock, Loader2,
+  Award, Users,
+  ChevronRight, CheckCircle2, Lock, Loader2,
   Star, Sun, Moon, Cloud, Home,
 } from 'lucide-react'
 
@@ -42,10 +43,10 @@ export default function Booking() {
   const {
     register,
     handleSubmit,
-    watch,
     getValues,
     setError,
     clearErrors,
+    control,
     formState: { errors, isSubmitting },
   } = useForm({
     mode: 'onChange',
@@ -64,7 +65,7 @@ export default function Booking() {
     },
   })
 
-  const paymentMethod = watch('paymentMethod')
+  const paymentMethod = useWatch({ control, name: 'paymentMethod' })
   const minDate = new Date().toISOString().split('T')[0]
 
   const handleCopy = (text, id) => {
@@ -90,9 +91,8 @@ export default function Booking() {
   }
 
   const buildWhatsappLink = (data) => {
-    const phone = import.meta.env.VITE_WHATSAPP_NUMBER || '03314896544'
     const message = `Assalam o Alaikum Dr. Zainab! I have booked a consultation and sent payment via ${data.paymentMethod}. My Transaction ID is ${data.transactionId}. Preferred: ${data.preferredDate} (${data.preferredTimeSlot}). My name is ${data.fullName}.`
-    return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
+    return buildWhatsAppUrl(message)
   }
 
   const onSubmit = async (values) => {

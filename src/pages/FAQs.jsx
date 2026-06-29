@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Search, HelpCircle, ArrowRight, Sparkles } from 'lucide-react'
+import { Search, HelpCircle, ArrowRight } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { posthog } from '../lib/posthog'
 import FAQAccordion from '../components/FAQAccordion'
@@ -34,12 +34,7 @@ export default function FAQs() {
     return () => clearTimeout(timer)
   }, [searchQuery])
 
-  useEffect(() => {
-    posthog.capture('faqs_page_viewed')
-    fetchFaqs()
-  }, [])
-
-  const fetchFaqs = async () => {
+  async function fetchFaqs() {
     setLoading(true)
     const { data, error } = await supabase
       .from('faqs')
@@ -49,6 +44,14 @@ export default function FAQs() {
     if (!error && data) setFaqs(data)
     setLoading(false)
   }
+
+  useEffect(() => {
+    posthog.capture('faqs_page_viewed')
+    const timer = window.setTimeout(() => {
+      fetchFaqs()
+    }, 0)
+    return () => window.clearTimeout(timer)
+  }, [])
 
   // Filter logic
   const filtered = faqs.filter((f) => {

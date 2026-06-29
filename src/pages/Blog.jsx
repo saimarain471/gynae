@@ -13,16 +13,7 @@ export default function Blog() {
   const [loading, setLoading] = useState(true)
   const [activeCategory, setActiveCategory] = useState('All')
 
-  useEffect(() => {
-    posthog.capture('blog_page_viewed')
-    fetchPosts()
-  }, [])
-
-  useEffect(() => {
-    posthog.capture('blog_category_filtered', { category: activeCategory })
-  }, [activeCategory])
-
-  const fetchPosts = async () => {
+  async function fetchPosts() {
     setLoading(true)
     const { data, error } = await supabase
       .from('blog_posts')
@@ -35,6 +26,18 @@ export default function Blog() {
     }
     setLoading(false)
   }
+
+  useEffect(() => {
+    posthog.capture('blog_page_viewed')
+    const timer = window.setTimeout(() => {
+      fetchPosts()
+    }, 0)
+    return () => window.clearTimeout(timer)
+  }, [])
+
+  useEffect(() => {
+    posthog.capture('blog_category_filtered', { category: activeCategory })
+  }, [activeCategory])
 
   const filtered =
     activeCategory === 'All'

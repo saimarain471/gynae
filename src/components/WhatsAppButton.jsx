@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
-import { MessageCircle, X } from 'lucide-react'
-
-const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '03314896544'
+import { X } from 'lucide-react'
+import { buildWhatsAppUrl } from '../lib/whatsapp'
 
 const QUICK_MESSAGES = [
   { label: 'Enroll in a class', text: 'Assalam o Alaikum Dr. Zainub! I want to enroll in one of your online classes. Please guide me.' },
@@ -25,8 +24,7 @@ export default function WhatsAppButton() {
   }, [])
 
   const openWhatsApp = (message) => {
-    const encoded = encodeURIComponent(message)
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encoded}`, '_blank')
+    window.open(buildWhatsAppUrl(message), '_blank')
     setIsOpen(false)
   }
 

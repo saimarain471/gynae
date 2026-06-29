@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { posthog } from '../lib/posthog'
 
 export default function BookingForm({ submitLabel, onSubmit, children }) {
   const [loading, setLoading] = useState(false)
@@ -35,7 +34,7 @@ export default function BookingForm({ submitLabel, onSubmit, children }) {
       await onSubmit(values)
       setSuccessMessage('Your booking has been received! Dr. Zainub will verify your payment and send your class access link to your WhatsApp within a few hours.')
       reset({ paymentMethod: '' })
-    } catch (error) {
+    } catch {
       setErrorMessage('Something went wrong. Please try again or contact us on WhatsApp.')
     } finally {
       setLoading(false)

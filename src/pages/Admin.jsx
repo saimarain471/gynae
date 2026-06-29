@@ -13,7 +13,7 @@ import AdminBookingRow from '../components/AdminBookingRow'
 // Use a strong password and consider moving it to an
 // environment variable: import.meta.env.VITE_ADMIN_PASSWORD
 // ─────────────────────────────────────────────────────────────
-const ADMIN_PASSWORD = 'DrZainab@2025'
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || ''
 
 // ── Skeleton row ──────────────────────────────────────────────
 function TableSkeletonRow() {
@@ -120,7 +120,7 @@ function LoginScreen({ onSuccess }) {
 
   const handleLogin = (e) => {
     e.preventDefault()
-    if (pwInput === ADMIN_PASSWORD) {
+    if (ADMIN_PASSWORD && pwInput === ADMIN_PASSWORD) {
       sessionStorage.setItem('admin_authed', 'true')
       onSuccess()
     } else {
@@ -189,7 +189,7 @@ function LoginScreen({ onSuccess }) {
 // MAIN ADMIN DASHBOARD
 // ═══════════════════════════════════════════════════════════════
 export default function Admin() {
-  const [authed, setAuthed] = useState(false)
+  const [authed, setAuthed] = useState(() => sessionStorage.getItem('admin_authed') === 'true')
 
   // Data
   const [classBookings, setClassBookings] = useState([])
@@ -206,16 +206,11 @@ export default function Admin() {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
 
-  // Check session on mount
-  useEffect(() => {
-    if (sessionStorage.getItem('admin_authed') === 'true') setAuthed(true)
-  }, [])
-
   useEffect(() => {
     if (authed) fetchAllBookings()
   }, [authed])
 
-  const fetchAllBookings = async () => {
+  async function fetchAllBookings() {
     setLoading(true)
     setError(null)
     try {

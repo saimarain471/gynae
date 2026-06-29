@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import { supabase } from '../lib/supabase'
@@ -48,28 +48,7 @@ export default function BlogPost() {
   const [relatedPosts, setRelatedPosts] = useState([])
   const [copied, setCopied] = useState(false)
 
-  useEffect(() => {
-    fetchPost()
-  }, [slug])
-
-  useEffect(() => {
-    if (post) {
-      // Update document title and meta description for SEO
-      document.title = `${post.title} — Dr. Zainab Mohsin`
-      document
-        .querySelector('meta[name="description"]')
-        ?.setAttribute('content', post.excerpt)
-
-      // Track PostHog event
-      posthog.capture('blog_post_viewed', {
-        slug,
-        title: post.title,
-        category: post.category,
-      })
-    }
-  }, [post])
-
-  const fetchPost = async () => {
+  const fetchPost = useCallback(async () => {
     setLoading(true)
 
     const { data: postData, error } = await supabase
@@ -103,7 +82,31 @@ export default function BlogPost() {
 
     setRelatedPosts(related || [])
     setLoading(false)
-  }
+  }, [slug])
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      fetchPost()
+    }, 0)
+    return () => window.clearTimeout(timer)
+  }, [fetchPost])
+
+  useEffect(() => {
+    if (post) {
+      // Update document title and meta description for SEO
+      document.title = `${post.title} — Dr. Zainab Mohsin`
+      document
+        .querySelector('meta[name="description"]')
+        ?.setAttribute('content', post.excerpt)
+
+      // Track PostHog event
+      posthog.capture('blog_post_viewed', {
+        slug,
+        title: post.title,
+        category: post.category,
+      })
+    }
+  }, [post, slug])
 
   const handleWhatsAppShare = () => {
     posthog.capture('blog_share_clicked', { method: 'whatsapp' })

@@ -24,17 +24,9 @@ const categoryStyles = {
   },
 }
 
-export default function BlogCard({ id, title, slug, excerpt, category, author, read_time, created_at, cover_image_url }) {
+export default function BlogCard({ title, slug, excerpt, category, author, read_time, cover_image_url }) {
   const style = categoryStyles[category] || categoryStyles.General
   const Icon = style.icon
-
-  const formatDate = (dateStr) => {
-    return new Date(dateStr).toLocaleDateString('en-PK', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    })
-  }
 
   return (
     <Link

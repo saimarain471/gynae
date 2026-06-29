@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { posthog } from '../lib/posthog'
 import TestimonialCard from '../components/TestimonialCard'
 import StarRating from '../components/StarRating'
-import { Star, CheckCircle, MessageSquarePlus, ArrowRight, Filter } from 'lucide-react'
+import { Star, CheckCircle, MessageSquarePlus } from 'lucide-react'
 
 const SERVICE_TYPES = [
   'Consultation',
@@ -52,16 +51,7 @@ export default function Testimonials() {
   const [submitted, setSubmitted] = useState(false)
   const [submitError, setSubmitError] = useState('')
 
-  useEffect(() => {
-    posthog.capture('testimonials_page_viewed')
-    fetchTestimonials()
-  }, [])
-
-  useEffect(() => {
-    posthog.capture('testimonial_filter_changed', { filter: activeFilter })
-  }, [activeFilter])
-
-  const fetchTestimonials = async () => {
+  async function fetchTestimonials() {
     setLoading(true)
     const { data, error } = await supabase
       .from('testimonials')
@@ -72,6 +62,18 @@ export default function Testimonials() {
     if (!error && data) setTestimonials(data)
     setLoading(false)
   }
+
+  useEffect(() => {
+    posthog.capture('testimonials_page_viewed')
+    const timer = window.setTimeout(() => {
+      fetchTestimonials()
+    }, 0)
+    return () => window.clearTimeout(timer)
+  }, [])
+
+  useEffect(() => {
+    posthog.capture('testimonial_filter_changed', { filter: activeFilter })
+  }, [activeFilter])
 
   const filtered =
     activeFilter === 'All'
