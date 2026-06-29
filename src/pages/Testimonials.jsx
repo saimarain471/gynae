@@ -40,6 +40,7 @@ function TestimonialSkeleton() {
 export default function Testimonials() {
   const [testimonials, setTestimonials] = useState([])
   const [loading, setLoading] = useState(true)
+  const [fetchError, setFetchError] = useState(null)
   const [activeFilter, setActiveFilter] = useState('All')
 
   // Submission form state
@@ -63,13 +64,19 @@ export default function Testimonials() {
 
   const fetchTestimonials = async () => {
     setLoading(true)
+    setFetchError(null)
     const { data, error } = await supabase
       .from('testimonials')
       .select('*')
       .eq('approved', true)
       .order('featured', { ascending: false })
       .order('created_at', { ascending: false })
-    if (!error && data) setTestimonials(data)
+    if (error) {
+      console.error('Failed to fetch testimonials:', error)
+      setFetchError('Unable to load reviews. Please try again later.')
+    } else {
+      setTestimonials(data || [])
+    }
     setLoading(false)
   }
 
@@ -190,6 +197,16 @@ export default function Testimonials() {
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {Array.from({ length: 6 }).map((_, i) => <TestimonialSkeleton key={i} />)}
+          </div>
+        ) : fetchError ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center gap-3">
+            <p className="text-red-600 font-semibold text-lg">{fetchError}</p>
+            <button
+              onClick={fetchTestimonials}
+              className="text-[#2D6A4F] text-sm font-medium underline underline-offset-2"
+            >
+              Try again
+            </button>
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center gap-3">

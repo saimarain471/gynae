@@ -21,6 +21,7 @@ function highlight(text, query) {
 export default function FAQs() {
   const [faqs, setFaqs] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [activeCategory, setActiveCategory] = useState('All')
   const [searchQuery, setSearchQuery] = useState('')
   const [openId, setOpenId] = useState(null)
@@ -41,12 +42,18 @@ export default function FAQs() {
 
   const fetchFaqs = async () => {
     setLoading(true)
-    const { data, error } = await supabase
+    setError(null)
+    const { data, error: fetchError } = await supabase
       .from('faqs')
       .select('*')
       .eq('published', true)
       .order('sort_order', { ascending: true })
-    if (!error && data) setFaqs(data)
+    if (fetchError) {
+      console.error('Failed to fetch FAQs:', fetchError)
+      setError('Unable to load FAQs. Please try again later.')
+    } else {
+      setFaqs(data || [])
+    }
     setLoading(false)
   }
 
@@ -145,6 +152,16 @@ export default function FAQs() {
                 <div className="h-3 bg-gray-100 rounded w-full mt-3" />
               </div>
             ))}
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center py-24 text-center gap-3">
+            <p className="text-red-600 font-semibold text-lg">{error}</p>
+            <button
+              onClick={fetchFaqs}
+              className="mt-2 text-[#2D6A4F] text-sm font-medium underline underline-offset-2"
+            >
+              Try again
+            </button>
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center gap-3">

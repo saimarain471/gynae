@@ -110,9 +110,13 @@ function BlogTab({ showToast }) {
 
   const fetchAllPosts = async () => {
     setLoadingPosts(true)
-    const { data } = await supabase.from('blog_posts')
+    const { data, error } = await supabase.from('blog_posts')
       .select('id, title, slug, published, created_at, views, category')
       .order('created_at', { ascending: false })
+    if (error) {
+      console.error('Failed to fetch blog posts:', error)
+      showToast('Failed to load posts: ' + error.message, 'error')
+    }
     setPosts(data || [])
     setLoadingPosts(false)
   }
@@ -322,7 +326,11 @@ function FAQsTab({ showToast }) {
 
   const fetchFaqs = async () => {
     setLoading(true)
-    const { data } = await supabase.from('faqs').select('*').order('sort_order', { ascending: true })
+    const { data, error } = await supabase.from('faqs').select('*').order('sort_order', { ascending: true })
+    if (error) {
+      console.error('Failed to fetch FAQs:', error)
+      showToast('Failed to load FAQs: ' + error.message, 'error')
+    }
     setFaqs(data || [])
     setLoading(false)
   }
@@ -472,7 +480,11 @@ function ReviewsTab({ showToast }) {
 
   const fetchReviews = async () => {
     setLoading(true)
-    const { data } = await supabase.from('testimonials').select('*').order('created_at', { ascending: false })
+    const { data, error } = await supabase.from('testimonials').select('*').order('created_at', { ascending: false })
+    if (error) {
+      console.error('Failed to fetch reviews:', error)
+      showToast('Failed to load reviews: ' + error.message, 'error')
+    }
     setReviews(data || [])
     setLoading(false)
   }

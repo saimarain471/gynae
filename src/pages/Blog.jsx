@@ -11,6 +11,7 @@ const CATEGORIES = ['All', 'Prenatal', 'Postnatal', 'Baby Care', 'General']
 export default function Blog() {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [activeCategory, setActiveCategory] = useState('All')
 
   useEffect(() => {
@@ -24,14 +25,18 @@ export default function Blog() {
 
   const fetchPosts = async () => {
     setLoading(true)
-    const { data, error } = await supabase
+    setError(null)
+    const { data, error: fetchError } = await supabase
       .from('blog_posts')
       .select('id, title, slug, excerpt, category, author, read_time, created_at, cover_image_url')
       .eq('published', true)
       .order('created_at', { ascending: false })
 
-    if (!error && data) {
-      setPosts(data)
+    if (fetchError) {
+      console.error('Failed to fetch blog posts:', fetchError)
+      setError('Unable to load posts. Please try again later.')
+    } else {
+      setPosts(data || [])
     }
     setLoading(false)
   }
@@ -89,7 +94,17 @@ export default function Blog() {
 
       {/* Blog grid */}
       <main className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10">
-        {loading ? (
+        {error ? (
+          <div className="flex flex-col items-center justify-center py-24 text-center gap-3">
+            <p className="text-red-600 font-semibold text-lg">{error}</p>
+            <button
+              onClick={fetchPosts}
+              className="mt-2 text-[#2D6A4F] text-sm font-medium underline underline-offset-2"
+            >
+              Try again
+            </button>
+          </div>
+        ) : loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: 6 }).map((_, i) => (
               <BlogSkeleton key={i} />
