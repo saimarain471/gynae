@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { supabase } from '../lib/supabase'
-import StarRating from '../components/StarRating'
+import AdminLogin from '../components/AdminLogin'
 import {
-  Lock, LogOut, PenSquare, Eye, EyeOff, Trash2,
+  LogOut, PenSquare, Trash2,
   ToggleLeft, ToggleRight, CheckCircle, XCircle,
   ChevronDown, Loader2, HelpCircle, Star, Clock,
 } from 'lucide-react'
@@ -40,53 +40,7 @@ function Toast({ message, type, onClose }) {
   )
 }
 
-// ── Login Card ─────────────────────────────────────────────────
-function LoginCard({ onSuccess }) {
-  const [pw, setPw] = useState('')
-  const [showPw, setShowPw] = useState(false)
-  const [error, setError] = useState(false)
 
-  const handleLogin = (e) => {
-    e.preventDefault()
-    if (pw === ADMIN_PASSWORD) onSuccess()
-    else { setError(true); setPw('') }
-  }
-
-  return (
-    <div className="min-h-screen bg-[#FAFAF8] flex items-center justify-center px-4">
-      <div className="w-full max-w-sm bg-white rounded-2xl border border-gray-100 shadow-soft p-8">
-        <div className="flex flex-col items-center mb-6">
-          <div className="w-14 h-14 rounded-full bg-[#E1F5EE] flex items-center justify-center mb-3">
-            <Lock size={24} className="text-[#2D6A4F]" />
-          </div>
-          <h1 className="font-['Playfair_Display'] text-2xl font-bold text-[#1A1A2E]">Admin Access</h1>
-          <p className="text-[#6B7280] text-sm mt-1">Enter the admin password to continue</p>
-        </div>
-        <form onSubmit={handleLogin} className="flex flex-col gap-4">
-          <div className="relative">
-            <input
-              id="admin-password"
-              type={showPw ? 'text' : 'password'}
-              value={pw}
-              onChange={(e) => { setPw(e.target.value); setError(false) }}
-              placeholder="Password"
-              autoComplete="current-password"
-              className={`w-full border rounded-xl px-4 py-3 text-sm text-[#1A1A2E] pr-11 outline-none transition-colors ${error ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-[#52B788]'}`}
-            />
-            <button type="button" onClick={() => setShowPw(v => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#2D6A4F]" tabIndex={-1}>
-              {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
-            </button>
-          </div>
-          {error && <p className="text-red-500 text-xs -mt-2">Incorrect password. Please try again.</p>}
-          <button type="submit" className="bg-[#2D6A4F] text-white rounded-xl py-3 text-sm font-semibold hover:bg-[#245c43] transition-colors">
-            Enter Admin Panel
-          </button>
-        </form>
-      </div>
-    </div>
-  )
-}
 
 // ═══════════════════════════════════════════════════════════════
 // BLOG POSTS TAB
@@ -597,7 +551,7 @@ export default function BlogAdmin() {
 
   const showToast = (message, type = 'success') => setToast({ message, type })
 
-  if (!authed) return <LoginCard onSuccess={() => setAuthed(true)} />
+  if (!authed) return <AdminLogin password={ADMIN_PASSWORD} onSuccess={() => setAuthed(true)} subtitle="Enter the admin password to continue" />
 
   const tabs = [
     { id: 'blog', label: 'Blog Posts', icon: PenSquare },

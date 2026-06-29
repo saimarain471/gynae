@@ -3,6 +3,9 @@ import { useParams, Link } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import { supabase } from '../lib/supabase'
 import { posthog } from '../lib/posthog'
+import { formatDate, copyToClipboard } from '../lib/utils'
+import LoadingSpinner from '../components/LoadingSpinner'
+import WhatsAppIcon from '../components/WhatsAppIcon'
 import {
   Clock,
   Eye,
@@ -115,32 +118,16 @@ export default function BlogPost() {
 
   const handleCopyLink = async () => {
     posthog.capture('blog_share_clicked', { method: 'copy_link' })
-    try {
-      await navigator.clipboard.writeText(window.location.href)
+    const ok = await copyToClipboard(window.location.href)
+    if (ok) {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
-    } catch {
-      // fallback: select the url
     }
   }
 
-  const formatDate = (dateStr) =>
-    new Date(dateStr).toLocaleDateString('en-PK', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    })
-
   // ── Loading state ──────────────────────────────────────────────
   if (loading) {
-    return (
-      <div className="min-h-screen bg-[#FAFAF8] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-4 border-[#52B788] border-t-transparent rounded-full animate-spin" />
-          <p className="text-[#6B7280] text-sm">Loading article…</p>
-        </div>
-      </div>
-    )
+    return <LoadingSpinner message="Loading article…" />
   }
 
   // ── Not found state ─────────────────────────────────────────────
@@ -276,11 +263,7 @@ export default function BlogPost() {
               onClick={handleWhatsAppShare}
               className="flex items-center gap-2 border border-[#52B788]/40 text-[#2D6A4F] rounded-xl px-4 py-2 text-sm hover:bg-[#E1F5EE] transition-colors"
             >
-              {/* WhatsApp icon */}
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="#2D6A4F">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
-                <path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.558 4.118 1.534 5.843L0 24l6.335-1.518A11.935 11.935 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.006-1.37l-.359-.214-3.737.896.938-3.636-.235-.374A9.819 9.819 0 012.182 12C2.182 6.575 6.575 2.182 12 2.182S21.818 6.575 21.818 12 17.425 21.818 12 21.818z" />
-              </svg>
+              <WhatsAppIcon />
               Share on WhatsApp
             </button>
             <button

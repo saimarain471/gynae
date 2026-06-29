@@ -1,26 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
-import { z } from 'zod'
 import { ShieldCheck, Check, CheckCircle2 } from 'lucide-react'
 import { classes } from '../data/classes'
 import { supabase } from '../lib/supabase'
 import { posthog } from '../lib/posthog'
+import { personalDetailsSchema, classPaymentSchema, validateStep } from '../lib/validators'
+import { buildClassWhatsappLink } from '../lib/utils'
+import { PAYMENT_INFO_MAP } from '../lib/constants'
 import PaymentInstructions from '../components/PaymentInstructions'
-
-const stepOneSchema = z.object({
-  fullName: z.string().min(3, 'Please enter your full name.'),
-  email: z.string().email('Please enter a valid email address.'),
-  phone: z.string().min(10, 'Please enter your phone number.'),
-  whatsappNumber: z.string().min(10, 'Please enter your WhatsApp number.'),
-  city: z.string().min(2, 'Please enter your city.'),
-})
-
-const stepTwoSchema = z.object({
-  paymentMethod: z.enum(['JazzCash', 'EasyPaisa', 'Bank Transfer'], 'Please select a payment method.'),
-  transactionId: z.string().min(3, 'Please enter your transaction ID.'),
-  additionalNotes: z.string().optional(),
-})
 
 export default function BookClass() {
   const { id } = useParams()
@@ -75,16 +63,7 @@ export default function BookClass() {
 
   const handleNext = () => {
     const values = getValues()
-    const result = stepOneSchema.safeParse(values)
-
-    if (!result.success) {
-      const fieldErrors = result.error.flatten().fieldErrors
-      Object.entries(fieldErrors).forEach(([field, messages]) => {
-        setError(field, { type: 'validation', message: messages?.[0] ?? 'Invalid value' })
-      })
-      return
-    }
-
+    if (!validateStep(personalDetailsSchema, values, setError)) return
     clearErrors()
     setStep(2)
   }
@@ -100,23 +79,10 @@ export default function BookClass() {
     )
   }
 
-  const buildWhatsappLink = ({ fullName, paymentMethod, transactionId }) => {
-    const phone = import.meta.env.VITE_WHATSAPP_NUMBER || '03314896544'
-    const message = `Assalam o Alaikum Dr. Zainub! I have enrolled in ${classData.title} and sent payment via ${paymentMethod}. My Transaction ID is ${transactionId}. My name is ${fullName}.`
-    return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
-  }
-
   const onSubmit = async (values) => {
     setSubmitError('')
 
-    const result = stepTwoSchema.safeParse(values)
-    if (!result.success) {
-      const fieldErrors = result.error.flatten().fieldErrors
-      Object.entries(fieldErrors).forEach(([field, messages]) => {
-        setError(field, { type: 'validation', message: messages?.[0] ?? 'Invalid value' })
-      })
-      return
-    }
+    if (!validateStep(classPaymentSchema, values, setError)) return
 
     const payload = {
       full_name: values.fullName,
@@ -146,15 +112,9 @@ export default function BookClass() {
       paymentMethod: values.paymentMethod,
     })
 
-    setWhatsappUrl(buildWhatsappLink(values))
+    setWhatsappUrl(buildClassWhatsappLink({ ...values, classTitle: classData.title }))
     setSubmitted(true)
     return true
-  }
-
-  const paymentInfoMap = {
-    JazzCash: 'JazzCash: 0300-0000000 (Zainab Mohsin)',
-    EasyPaisa: 'EasyPaisa: 0301-0000000 (Zainab Mohsin)',
-    'Bank Transfer': 'HBL: PK00HABB0000001234567890 (Dr. Zainab Mohsin)',
   }
 
   return (
@@ -268,8 +228,8 @@ export default function BookClass() {
                       <option value="EasyPaisa">EasyPaisa</option>
                       <option value="Bank Transfer">Bank Transfer</option>
                     </select>
-                    {paymentMethod && paymentInfoMap[paymentMethod] && (
-                      <p className="text-xs italic text-[#6B7280]">{paymentInfoMap[paymentMethod]}</p>
+                    {paymentMethod && PAYMENT_INFO_MAP[paymentMethod] && (
+                      <p className="text-xs italic text-[#6B7280]">{PAYMENT_INFO_MAP[paymentMethod]}</p>
                     )}
                     {errors.paymentMethod && <p className="text-xs text-red-500">{errors.paymentMethod.message}</p>}
                   </div>
