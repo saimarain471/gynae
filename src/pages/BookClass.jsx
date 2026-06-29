@@ -136,7 +136,6 @@ export default function BookClass() {
     const { error } = await supabase.from('class_bookings').insert(payload)
     if (error) {
       setSubmitError('Something went wrong. Please try again or contact us on WhatsApp.')
-      console.error(error)
       return
     }
 

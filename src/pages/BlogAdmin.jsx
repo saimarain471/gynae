@@ -8,12 +8,7 @@ import {
   ChevronDown, Loader2, HelpCircle, Star, Clock,
 } from 'lucide-react'
 
-// ─────────────────────────────────────────────────────────────
-// IMPORTANT: Change this password before going live!
-// This is a temporary hardcoded password for admin access.
-// For production, use Supabase Auth or environment variable.
-// ─────────────────────────────────────────────────────────────
-const ADMIN_PASSWORD = 'zainab2025'
+const ADMIN_PASSWORD = import.meta.env.VITE_BLOG_ADMIN_PASSWORD || ''
 
 const BLOG_CATEGORIES = ['Prenatal', 'Postnatal', 'Baby Care', 'General']
 const FAQ_CATEGORIES = ['Appointments', 'Pregnancy', 'Baby Care', 'Postnatal', 'General']
@@ -46,8 +41,11 @@ function LoginCard({ onSuccess }) {
   const [showPw, setShowPw] = useState(false)
   const [error, setError] = useState(false)
 
+  const passwordConfigured = ADMIN_PASSWORD.length > 0
+
   const handleLogin = (e) => {
     e.preventDefault()
+    if (!passwordConfigured) return
     if (pw === ADMIN_PASSWORD) onSuccess()
     else { setError(true); setPw('') }
   }
@@ -78,6 +76,7 @@ function LoginCard({ onSuccess }) {
               {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
+          {!passwordConfigured && <p className="text-red-500 text-xs -mt-2">Admin access is not configured. Contact the site administrator.</p>}
           {error && <p className="text-red-500 text-xs -mt-2">Incorrect password. Please try again.</p>}
           <button type="submit" className="bg-[#2D6A4F] text-white rounded-xl py-3 text-sm font-semibold hover:bg-[#245c43] transition-colors">
             Enter Admin Panel

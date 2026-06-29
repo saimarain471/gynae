@@ -1,5 +1,10 @@
 -- Supabase SQL schema for Dr. Zainab Mohsin website
+--
+-- NOTE: The admin dashboard requires a service_role key or authenticated user
+-- to read/update/delete bookings. The anon role can only insert new bookings.
+-- Grant additional policies for the authenticated role as needed.
 
+-- ── Class bookings ─────────────────────────────────────────────
 create table if not exists class_bookings (
   id uuid default gen_random_uuid() primary key,
   created_at timestamp with time zone default now(),
@@ -17,6 +22,35 @@ create table if not exists class_bookings (
   status text default 'pending'
 );
 
+alter table class_bookings enable row level security;
+
+create policy "Allow public to insert class bookings"
+  on class_bookings for insert
+  to anon
+  with check (true);
+
+create policy "Deny public read on class bookings"
+  on class_bookings for select
+  to anon
+  using (false);
+
+create policy "Deny public update on class bookings"
+  on class_bookings for update
+  to anon
+  using (false);
+
+create policy "Deny public delete on class bookings"
+  on class_bookings for delete
+  to anon
+  using (false);
+
+create policy "Allow authenticated full access to class bookings"
+  on class_bookings for all
+  to authenticated
+  using (true)
+  with check (true);
+
+-- ── Consultation bookings ──────────────────────────────────────
 create table if not exists consultation_bookings (
   id uuid default gen_random_uuid() primary key,
   created_at timestamp with time zone default now(),
@@ -33,3 +67,31 @@ create table if not exists consultation_bookings (
   additional_notes text,
   status text default 'pending'
 );
+
+alter table consultation_bookings enable row level security;
+
+create policy "Allow public to insert consultation bookings"
+  on consultation_bookings for insert
+  to anon
+  with check (true);
+
+create policy "Deny public read on consultation bookings"
+  on consultation_bookings for select
+  to anon
+  using (false);
+
+create policy "Deny public update on consultation bookings"
+  on consultation_bookings for update
+  to anon
+  using (false);
+
+create policy "Deny public delete on consultation bookings"
+  on consultation_bookings for delete
+  to anon
+  using (false);
+
+create policy "Allow authenticated full access to consultation bookings"
+  on consultation_bookings for all
+  to authenticated
+  using (true)
+  with check (true);

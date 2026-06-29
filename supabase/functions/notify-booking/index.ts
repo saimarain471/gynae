@@ -4,15 +4,44 @@ const MAKE_WEBHOOK_URL = Deno.env.get("MAKE_WEBHOOK_URL") ?? ""
 const DOCTOR_WHATSAPP = Deno.env.get("DOCTOR_WHATSAPP_NUMBER") ?? ""
 const DOCTOR_EMAIL = Deno.env.get("DOCTOR_EMAIL") ?? ""
 
+// Invoked by Supabase database triggers (server-side), not browser requests.
+// CORS headers are included for completeness; set ALLOWED_ORIGIN if calling from a frontend.
+const corsHeaders = {
+  "Access-Control-Allow-Origin": Deno.env.get("ALLOWED_ORIGIN") ?? "",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+}
+
 serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: corsHeaders })
+  }
+
+  if (req.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Method not allowed" }), {
+      status: 405,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    })
+  }
+
   try {
     const body = await req.json()
 
     const record = body.record
     const table = body.table
 
-    if (!record) {
-      return new Response(JSON.stringify({ error: "No record found" }), { status: 400 })
+    if (!record || typeof record !== "object") {
+      return new Response(JSON.stringify({ error: "No record found" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      })
+    }
+
+    if (!record.full_name || !record.payment_method || !record.transaction_id) {
+      return new Response(JSON.stringify({ error: "Missing required booking fields" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      })
     }
 
     const isClass = table === "class_bookings"
@@ -20,30 +49,36 @@ serve(async (req) => {
     const subject = isClass ? record.class_title : "Consultation"
     const amount = isClass ? `PKR ${record.class_price}` : "PKR 2,000"
 
+    const sanitize = (val: unknown): string =>
+      typeof val === "string" ? val.slice(0, 500) : ""
+
     const payload = {
       booking_type: bookingType,
-      full_name: record.full_name,
-      email: record.email,
-      phone: record.phone,
-      whatsapp_number: record.whatsapp_number,
-      city: record.city,
-      subject,
+      full_name: sanitize(record.full_name),
+      email: sanitize(record.email),
+      phone: sanitize(record.phone),
+      whatsapp_number: sanitize(record.whatsapp_number),
+      city: sanitize(record.city),
+      subject: sanitize(subject),
       amount,
-      payment_method: record.payment_method,
-      transaction_id: record.transaction_id,
-      additional_notes: record.additional_notes ?? "",
-      preferred_date: record.preferred_date ?? "",
-      preferred_time: record.preferred_time ?? "",
-      concern: record.concern ?? "",
-      status: record.status,
-      created_at: record.created_at,
-      booking_id: record.id,
+      payment_method: sanitize(record.payment_method),
+      transaction_id: sanitize(record.transaction_id),
+      additional_notes: sanitize(record.additional_notes),
+      preferred_date: sanitize(record.preferred_date),
+      preferred_time: sanitize(record.preferred_time),
+      concern: sanitize(record.concern),
+      status: sanitize(record.status),
+      created_at: sanitize(record.created_at),
+      booking_id: sanitize(record.id),
       doctor_whatsapp: DOCTOR_WHATSAPP,
       doctor_email: DOCTOR_EMAIL,
     }
 
     if (!MAKE_WEBHOOK_URL) {
-      return new Response(JSON.stringify({ error: "MAKE_WEBHOOK_URL is not configured" }), { status: 500 })
+      return new Response(JSON.stringify({ error: "Webhook URL is not configured" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      })
     }
 
     const makeResponse = await fetch(MAKE_WEBHOOK_URL, {
@@ -53,14 +88,22 @@ serve(async (req) => {
     })
 
     if (!makeResponse.ok) {
-      console.error("Make.com webhook failed:", await makeResponse.text())
-      return new Response(JSON.stringify({ error: "Make.com webhook failed" }), { status: 500 })
+      console.error("Webhook delivery failed")
+      return new Response(JSON.stringify({ error: "Webhook delivery failed" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      })
     }
 
-    console.log(`Booking notification sent for: ${record.full_name} — ${bookingType}`)
-    return new Response(JSON.stringify({ success: true }), { status: 200 })
+    return new Response(JSON.stringify({ success: true }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    })
   } catch (error) {
-    console.error("Edge function error:", error)
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), { status: 500 })
+    console.error("Edge function error:", error instanceof Error ? error.message : "Unknown error")
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    })
   }
 })

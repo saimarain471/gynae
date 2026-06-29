@@ -8,12 +8,7 @@ import { supabase } from '../lib/supabase'
 import AdminStatCard from '../components/AdminStatCard'
 import AdminBookingRow from '../components/AdminBookingRow'
 
-// ─────────────────────────────────────────────────────────────
-// ⚠️ IMPORTANT: Change this password before going live!
-// Use a strong password and consider moving it to an
-// environment variable: import.meta.env.VITE_ADMIN_PASSWORD
-// ─────────────────────────────────────────────────────────────
-const ADMIN_PASSWORD = 'DrZainab@2025'
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || ''
 
 // ── Skeleton row ──────────────────────────────────────────────
 function TableSkeletonRow() {
@@ -118,8 +113,11 @@ function LoginScreen({ onSuccess }) {
   const [pwError, setPwError] = useState(false)
   const [showPw, setShowPw] = useState(false)
 
+  const passwordConfigured = ADMIN_PASSWORD.length > 0
+
   const handleLogin = (e) => {
     e.preventDefault()
+    if (!passwordConfigured) return
     if (pwInput === ADMIN_PASSWORD) {
       sessionStorage.setItem('admin_authed', 'true')
       onSuccess()
@@ -167,6 +165,12 @@ function LoginScreen({ onSuccess }) {
             </button>
           </div>
 
+          {!passwordConfigured && (
+            <p className="text-red-500 text-sm -mt-2 text-center">
+              Admin access is not configured. Contact the site administrator.
+            </p>
+          )}
+
           {pwError && (
             <p className="text-red-500 text-sm -mt-2 text-center">
               Incorrect password. Try again.
@@ -206,9 +210,9 @@ export default function Admin() {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
 
-  // Check session on mount
+  // Check session on mount (only if password is configured)
   useEffect(() => {
-    if (sessionStorage.getItem('admin_authed') === 'true') setAuthed(true)
+    if (ADMIN_PASSWORD && sessionStorage.getItem('admin_authed') === 'true') setAuthed(true)
   }, [])
 
   useEffect(() => {

@@ -127,7 +127,6 @@ export default function Booking() {
     const { error } = await supabase.from('consultation_bookings').insert(payload)
     if (error) {
       setSubmitError('Something went wrong. Please try again or contact us on WhatsApp.')
-      console.error(error)
       setStatus('error')
       return
     }
