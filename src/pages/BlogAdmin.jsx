@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { supabase } from '../lib/supabase'
-import StarRating from '../components/StarRating'
 import {
   Lock, LogOut, PenSquare, Eye, EyeOff, Trash2,
   ToggleLeft, ToggleRight, CheckCircle, XCircle,
@@ -9,11 +8,12 @@ import {
 } from 'lucide-react'
 
 // ─────────────────────────────────────────────────────────────
-// IMPORTANT: Change this password before going live!
-// This is a temporary hardcoded password for admin access.
-// For production, use Supabase Auth or environment variable.
+// ⚠️ This is only a light client-side gate — the password ships in
+// the JS bundle and is NOT real security. Protect content tables
+// with Supabase Row Level Security / Auth. Set VITE_ADMIN_PASSWORD
+// in your environment (shared with the bookings Admin panel).
 // ─────────────────────────────────────────────────────────────
-const ADMIN_PASSWORD = 'zainab2025'
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'DrZainab@2025'
 
 const BLOG_CATEGORIES = ['Prenatal', 'Postnatal', 'Baby Care', 'General']
 const FAQ_CATEGORIES = ['Appointments', 'Pregnancy', 'Baby Care', 'Postnatal', 'General']
@@ -127,8 +127,22 @@ function BlogTab({ showToast }) {
       showToast('Please fill in all required fields.', 'error'); return
     }
     setSubmitting(true)
+
+    // Prevent duplicate slugs (each post must have a unique URL).
+    const slug = form.slug.trim()
+    const { data: existing } = await supabase
+      .from('blog_posts')
+      .select('id')
+      .eq('slug', slug)
+      .maybeSingle()
+    if (existing) {
+      showToast('A post with this slug already exists. Please choose a unique slug.', 'error')
+      setSubmitting(false)
+      return
+    }
+
     const { error } = await supabase.from('blog_posts').insert({
-      title: form.title.trim(), slug: form.slug.trim(), category: form.category,
+      title: form.title.trim(), slug, category: form.category,
       excerpt: form.excerpt.trim(), read_time: Number(form.readTime) || 5,
       cover_image_url: form.coverImageUrl.trim() || null,
       content: form.content.trim(), published,
@@ -431,7 +445,7 @@ function FAQsTab({ showToast }) {
                   <tr key={faq.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                     <td className="py-3 pr-4 max-w-xs">
                       <p className="text-[#1A1A2E] font-medium truncate">{faq.question}</p>
-                      <p className="text-xs text-[#6B7280] truncate mt-0.5">{faq.answer.slice(0, 80)}…</p>
+                      <p className="text-xs text-[#6B7280] truncate mt-0.5">{faq.answer.length > 80 ? faq.answer.slice(0, 80) + '…' : faq.answer}</p>
                     </td>
                     <td className="py-3 pr-4 text-xs text-[#6B7280]">{faq.category}</td>
                     <td className="py-3 pr-4">
@@ -553,7 +567,7 @@ function ReviewsTab({ showToast }) {
                   </td>
                   <td className="py-3 pr-4 text-xs text-[#6B7280] whitespace-nowrap">{r.service_type}</td>
                   <td className="py-3 pr-4 max-w-xs">
-                    <p className="text-xs text-[#374151] truncate">{r.review_text.slice(0, 80)}…</p>
+                    <p className="text-xs text-[#374151] truncate">{r.review_text.length > 80 ? r.review_text.slice(0, 80) + '…' : r.review_text}</p>
                   </td>
                   <td className="py-3 pr-4">
                     <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${r.approved ? 'bg-[#E1F5EE] text-[#2D6A4F]' : 'bg-yellow-50 text-yellow-700'}`}>
@@ -591,13 +605,22 @@ function ReviewsTab({ showToast }) {
 // MAIN EXPORT
 // ═══════════════════════════════════════════════════════════════
 export default function BlogAdmin() {
-  const [authed, setAuthed] = useState(false)
+  const [authed, setAuthed] = useState(() => sessionStorage.getItem('admin_authed') === 'true')
   const [activeTab, setActiveTab] = useState('blog')
   const [toast, setToast] = useState(null)
 
   const showToast = (message, type = 'success') => setToast({ message, type })
 
-  if (!authed) return <LoginCard onSuccess={() => setAuthed(true)} />
+  const handleAuthed = () => {
+    sessionStorage.setItem('admin_authed', 'true')
+    setAuthed(true)
+  }
+  const handleSignOut = () => {
+    sessionStorage.removeItem('admin_authed')
+    setAuthed(false)
+  }
+
+  if (!authed) return <LoginCard onSuccess={handleAuthed} />
 
   const tabs = [
     { id: 'blog', label: 'Blog Posts', icon: PenSquare },
@@ -613,7 +636,7 @@ export default function BlogAdmin() {
       <div className="bg-white border-b border-gray-100 sticky top-16 z-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
           <span className="font-semibold text-[#1A1A2E] text-sm">Content Admin Panel</span>
-          <button onClick={() => setAuthed(false)}
+          <button onClick={handleSignOut}
             className="flex items-center gap-1.5 text-xs text-[#6B7280] hover:text-red-500 transition-colors">
             <LogOut size={14} /> Sign out
           </button>

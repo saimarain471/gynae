@@ -1,22 +1,11 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Search, HelpCircle, ArrowRight, Sparkles } from 'lucide-react'
+import { Search, HelpCircle, ArrowRight } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { posthog } from '../lib/posthog'
 import FAQAccordion from '../components/FAQAccordion'
 
 const CATEGORIES = ['All', 'Appointments', 'Pregnancy', 'Baby Care', 'Postnatal', 'General']
-
-function highlight(text, query) {
-  if (!query.trim()) return text
-  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
-  const parts = text.split(regex)
-  return parts.map((part, i) =>
-    regex.test(part)
-      ? <mark key={i} className="bg-[#B7E4C7] rounded px-0.5 not-italic">{part}</mark>
-      : part
-  )
-}
 
 export default function FAQs() {
   const [faqs, setFaqs] = useState([])
@@ -177,7 +166,8 @@ export default function FAQs() {
                   {items.map((faq) => (
                     <FAQAccordion
                       key={faq.id}
-                      question={searchQuery ? <span>{highlight(faq.question, searchQuery)}</span> : faq.question}
+                      question={faq.question}
+                      searchQuery={searchQuery}
                       answer={faq.answer}
                       isOpen={openId === faq.id}
                       onToggle={() => handleToggle(faq.id)}

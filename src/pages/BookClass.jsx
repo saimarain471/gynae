@@ -6,13 +6,14 @@ import { ShieldCheck, Check, CheckCircle2 } from 'lucide-react'
 import { classes } from '../data/classes'
 import { supabase } from '../lib/supabase'
 import { posthog } from '../lib/posthog'
+import { toWhatsAppNumber, PHONE_REGEX } from '../lib/phone'
 import PaymentInstructions from '../components/PaymentInstructions'
 
 const stepOneSchema = z.object({
   fullName: z.string().min(3, 'Please enter your full name.'),
   email: z.string().email('Please enter a valid email address.'),
-  phone: z.string().min(10, 'Please enter your phone number.'),
-  whatsappNumber: z.string().min(10, 'Please enter your WhatsApp number.'),
+  phone: z.string().min(10, 'Please enter your phone number.').regex(PHONE_REGEX, 'Please enter a valid phone number (digits only).'),
+  whatsappNumber: z.string().min(10, 'Please enter your WhatsApp number.').regex(PHONE_REGEX, 'Please enter a valid WhatsApp number (digits only).'),
   city: z.string().min(2, 'Please enter your city.'),
 })
 
@@ -101,7 +102,7 @@ export default function BookClass() {
   }
 
   const buildWhatsappLink = ({ fullName, paymentMethod, transactionId }) => {
-    const phone = import.meta.env.VITE_WHATSAPP_NUMBER || '03314896544'
+    const phone = toWhatsAppNumber(import.meta.env.VITE_WHATSAPP_NUMBER || '03314896544')
     const message = `Assalam o Alaikum Dr. Zainub! I have enrolled in ${classData.title} and sent payment via ${paymentMethod}. My Transaction ID is ${transactionId}. My name is ${fullName}.`
     return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
   }
@@ -109,7 +110,9 @@ export default function BookClass() {
   const onSubmit = async (values) => {
     setSubmitError('')
 
-    const result = stepTwoSchema.safeParse(values)
+    // Re-validate both steps so step-1 fields can't be tampered with
+    // after advancing past step 1.
+    const result = stepOneSchema.extend(stepTwoSchema.shape).safeParse(values)
     if (!result.success) {
       const fieldErrors = result.error.flatten().fieldErrors
       Object.entries(fieldErrors).forEach(([field, messages]) => {

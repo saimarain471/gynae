@@ -1,10 +1,9 @@
-import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { posthog } from '../lib/posthog'
 import TestimonialCard from '../components/TestimonialCard'
 import StarRating from '../components/StarRating'
-import { Star, CheckCircle, MessageSquarePlus, ArrowRight, Filter } from 'lucide-react'
+import { Star, CheckCircle, MessageSquarePlus } from 'lucide-react'
 
 const SERVICE_TYPES = [
   'Consultation',
@@ -52,12 +51,19 @@ export default function Testimonials() {
   const [submitted, setSubmitted] = useState(false)
   const [submitError, setSubmitError] = useState('')
 
+  const isFirstFilterRender = useRef(true)
+
   useEffect(() => {
     posthog.capture('testimonials_page_viewed')
     fetchTestimonials()
   }, [])
 
   useEffect(() => {
+    // Skip the initial mount so we only track real filter changes.
+    if (isFirstFilterRender.current) {
+      isFirstFilterRender.current = false
+      return
+    }
     posthog.capture('testimonial_filter_changed', { filter: activeFilter })
   }, [activeFilter])
 
