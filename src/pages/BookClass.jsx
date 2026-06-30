@@ -8,6 +8,7 @@ import { supabase } from '../lib/supabase'
 import { posthog } from '../lib/posthog'
 import { buildWhatsAppUrl } from '../lib/whatsapp'
 import PaymentInstructions from '../components/PaymentInstructions'
+import CalcomEmbed from '../components/CalcomEmbed'
 
 const stepOneSchema = z.object({
   fullName: z.string().min(3, 'Please enter your full name.'),
@@ -32,6 +33,7 @@ export default function BookClass() {
   const [whatsappUrl, setWhatsappUrl] = useState('')
   const [step, setStep] = useState(1)
   const [formReady, setFormReady] = useState(false)
+  const [calBookingUid, setCalBookingUid] = useState('')
 
   const {
     register,
@@ -47,6 +49,8 @@ export default function BookClass() {
   })
 
   const paymentMethod = useWatch({ control, name: 'paymentMethod' })
+  const classCalLink = classData?.cal_link || import.meta.env.VITE_CALCOM_CLASS_LINK?.trim() || ''
+  const classCalNamespace = import.meta.env.VITE_CALCOM_NAMESPACE?.trim() || 'dr-zainab'
 
   useEffect(() => {
     let isMounted = true
@@ -107,6 +111,26 @@ export default function BookClass() {
     )
   }
 
+  const extractCalBookingUid = (event) => {
+    const data = event?.data || event || {}
+    return (
+      data.uid ||
+      data.booking_uid ||
+      data.bookingUid ||
+      data.booking?.uid ||
+      event?.detail?.data?.uid ||
+      event?.detail?.data?.booking_uid ||
+      ''
+    )
+  }
+
+  const handleCalBookingSuccess = (event) => {
+    const uid = extractCalBookingUid(event)
+    if (uid) {
+      setCalBookingUid(String(uid))
+    }
+  }
+
   const handleNext = () => {
     const values = getValues()
     const result = stepOneSchema.safeParse(values)
@@ -163,6 +187,7 @@ export default function BookClass() {
       payment_method: values.paymentMethod,
       transaction_id: values.transactionId,
       additional_notes: values.additionalNotes || '',
+      cal_booking_uid: calBookingUid || null,
       status: 'pending',
     }
 
@@ -205,6 +230,21 @@ export default function BookClass() {
           <p className="mt-2 text-sm leading-7 text-[#6B7280]">
             Complete the booking form, send payment manually, and submit the transaction details below.
           </p>
+
+          <div className="mt-6">
+            <CalcomEmbed
+              calLink={classCalLink}
+              namespace={classCalNamespace}
+              onBookingSuccess={handleCalBookingSuccess}
+              label="Pick a class slot"
+              duration={60}
+            />
+            {calBookingUid && (
+              <div className="mt-3 rounded-xl border border-[#52B788]/20 bg-[#E1F5EE] px-3 py-2 text-sm text-[#2D6A4F]">
+                Cal.com booking reference captured: {calBookingUid}
+              </div>
+            )}
+          </div>
 
           {submitted ? (
             <div className="mt-8 rounded-3xl border border-[#52B788]/30 bg-[#E1F5EE] p-8 text-center">

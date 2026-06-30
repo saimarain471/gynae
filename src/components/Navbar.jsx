@@ -8,6 +8,7 @@ const navItems = [
   { label: 'Classes', to: '/classes' },
   { label: 'Health Tips', to: '/blog' },
   { label: 'Book Consultation', to: '/booking' },
+  { label: 'Admin', to: '/admin' },
 ]
 
 export default function Navbar() {
@@ -46,7 +47,10 @@ export default function Navbar() {
             ))}
           </nav>
 
-          <div className="hidden items-center lg:flex">
+          <div className="hidden items-center gap-3 lg:flex">
+            <Link to="/blog/admin" className="rounded-xl border border-[#2D6A4F]/20 bg-[#E1F5EE] px-3 py-2 text-sm font-semibold text-[#2D6A4F] transition-colors hover:bg-[#d7efe2]">
+              Manage Blog
+            </Link>
             <Link to="/booking" className="rounded-xl bg-[#2D6A4F] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#245c43]">
               Book Now
             </Link>
@@ -95,7 +99,14 @@ export default function Navbar() {
           ))}
         </nav>
 
-        <div className="border-t border-gray-100 px-4 py-5">
+        <div className="border-t border-gray-100 px-4 py-5 space-y-3">
+          <Link
+            to="/blog/admin"
+            onClick={() => setMenuOpen(false)}
+            className="block w-full rounded-xl border border-[#2D6A4F]/20 bg-[#E1F5EE] py-3 text-center text-sm font-semibold text-[#2D6A4F] transition-colors hover:bg-[#d7efe2]"
+          >
+            Manage Blog
+          </Link>
           <Link
             to="/booking"
             onClick={() => setMenuOpen(false)}

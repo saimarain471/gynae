@@ -16,6 +16,7 @@ create table if not exists class_bookings (
   payment_method text not null,
   transaction_id text not null,
   additional_notes text,
+  cal_booking_uid text,
   status text default 'pending'
 );
 
@@ -33,6 +34,7 @@ create table if not exists consultation_bookings (
   payment_method text not null,
   transaction_id text not null,
   additional_notes text,
+  cal_booking_uid text,
   status text default 'pending'
 );
 

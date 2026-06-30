@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { supabase } from '../lib/supabase'
 import { posthog } from '../lib/posthog'
 import { buildWhatsAppUrl } from '../lib/whatsapp'
+import CalcomEmbed from '../components/CalcomEmbed'
 import {
   Video, Clock, MessageCircle, FileText, Heart,
   ShieldCheck, CreditCard, Copy, Check, GraduationCap,
@@ -39,6 +40,7 @@ export default function Booking() {
   const [imgError, setImgError] = useState(false)
   const [copiedId, setCopiedId] = useState(null)
   const [submittedData, setSubmittedData] = useState(null)
+  const [calBookingUid, setCalBookingUid] = useState('')
 
   const {
     register,
@@ -67,11 +69,33 @@ export default function Booking() {
 
   const paymentMethod = useWatch({ control, name: 'paymentMethod' })
   const minDate = new Date().toISOString().split('T')[0]
+  const consultationCalLink = import.meta.env.VITE_CALCOM_CONSULTATION_LINK?.trim() || ''
+  const consultationCalNamespace = import.meta.env.VITE_CALCOM_NAMESPACE?.trim() || 'dr-zainab'
 
   const handleCopy = (text, id) => {
     navigator.clipboard.writeText(text)
     setCopiedId(id)
     setTimeout(() => setCopiedId(null), 2000)
+  }
+
+  const extractCalBookingUid = (event) => {
+    const data = event?.data || event || {}
+    return (
+      data.uid ||
+      data.booking_uid ||
+      data.bookingUid ||
+      data.booking?.uid ||
+      event?.detail?.data?.uid ||
+      event?.detail?.data?.booking_uid ||
+      ''
+    )
+  }
+
+  const handleCalBookingSuccess = (event) => {
+    const uid = extractCalBookingUid(event)
+    if (uid) {
+      setCalBookingUid(String(uid))
+    }
   }
 
   const handleNext = () => {
@@ -121,6 +145,7 @@ export default function Booking() {
       payment_method: values.paymentMethod,
       transaction_id: values.transactionId,
       additional_notes: values.additionalNotes || '',
+      cal_booking_uid: calBookingUid || null,
       status: 'pending',
     }
 
@@ -454,6 +479,21 @@ export default function Booking() {
 
             {/* Booking Form */}
             <div className="rounded-2xl border border-gray-100 bg-white p-6">
+              <div className="mb-6">
+                <CalcomEmbed
+                  calLink={consultationCalLink}
+                  namespace={consultationCalNamespace}
+                  onBookingSuccess={handleCalBookingSuccess}
+                  label="Pick a consultation slot"
+                  duration={30}
+                />
+                {calBookingUid && (
+                  <div className="mt-3 rounded-xl border border-[#52B788]/20 bg-[#E1F5EE] px-3 py-2 text-sm text-[#2D6A4F]">
+                    Cal.com booking reference captured: {calBookingUid}
+                  </div>
+                )}
+              </div>
+
               {status === 'success' && submittedData ? (
                 // SUCCESS STATE
                 <div className="text-center">
