@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ShieldCheck, Star, Users, Award, Clock, ChevronRight, GraduationCap } from 'lucide-react'
+import { useSiteSettings } from '../hooks/useSiteSettings'
 
 function useCounter(target, duration = 1800, startOnView = true) {
   const [count, setCount] = useState(0)
@@ -75,7 +76,9 @@ function StatCard({ icon: Icon, target, suffix, label, delay }) {
 }
 
 export default function HeroSection() {
+  const { settings } = useSiteSettings()
   const [imgError, setImgError] = useState(false)
+  const consultationFee = settings?.consultation_fee ?? 2000
 
   return (
     <section className="relative overflow-hidden bg-[#FAFAF8] pb-12 pt-16 md:pb-16 md:pt-24">
@@ -164,7 +167,7 @@ export default function HeroSection() {
                 to="/booking"
                 className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#52B788]/40 bg-white px-6 py-3.5 text-sm font-semibold text-[#2D6A4F] transition-all duration-200 hover:border-[#F4A261] hover:bg-[#F4A261]/10"
               >
-                Book consultation — PKR 2,000
+                Book consultation — PKR {consultationFee.toLocaleString()}
               </Link>
             </motion.div>
 

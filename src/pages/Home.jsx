@@ -6,6 +6,7 @@ import TestimonialCard from '../components/TestimonialCard'
 import FAQAccordion from '../components/FAQAccordion'
 import { classes as fallbackClasses } from '../data/classes'
 import { supabase } from '../lib/supabase'
+import { useSiteSettings } from '../hooks/useSiteSettings'
 import { Star, HelpCircle, ArrowRight } from 'lucide-react'
 
 const stats = [
@@ -15,10 +16,12 @@ const stats = [
 ]
 
 export default function Home() {
+  const { settings } = useSiteSettings()
   const [featuredTestimonials, setFeaturedTestimonials] = useState([])
   const [topFaqs, setTopFaqs] = useState([])
   const [featuredClasses, setFeaturedClasses] = useState([])
   const [openFaqId, setOpenFaqId] = useState(null)
+  const consultationFee = settings?.consultation_fee ?? 2000
 
   async function fetchFeaturedTestimonials() {
     const { data } = await supabase
@@ -195,7 +198,7 @@ export default function Home() {
       {/* CTA */}
       <section className="mx-auto max-w-7xl rounded-[2rem] bg-primary/5 px-6 py-12 text-center shadow-sm lg:px-12">
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-secondary">Consultation</p>
-        <h2 className="mt-4 text-3xl font-semibold text-text">Book a 1-on-1 with Dr. Zainub — PKR 2,000</h2>
+        <h2 className="mt-4 text-3xl font-semibold text-text">Book a 1-on-1 with Dr. Zainub — PKR {consultationFee.toLocaleString()}</h2>
         <p className="mt-4 text-sm leading-7 text-text-muted">
           Secure a private video consultation for pregnancy support, baby care, and women&apos;s health guidance.
         </p>

@@ -71,7 +71,7 @@ export default function AdminOverview({ refreshKey = 0 }) {
 
         const consultRevenue = consultationsData
           .filter((c) => c.status === 'verified')
-          .reduce((sum) => sum + 2000, 0)
+          .reduce((sum, c) => sum + (Number(c.amount_charged) || 2000), 0)
 
         const revenue = classRevenue + consultRevenue
         const uniqueStudents = new Set([...consultationsData, ...classBookingsData].map((b) => b.email).filter(Boolean)).size
@@ -88,7 +88,7 @@ export default function AdminOverview({ refreshKey = 0 }) {
 
         const revenueSeries = last7Days.map((date) => {
           const dayBookings = [...classBookingsData, ...consultationsData].filter((b) => b.created_at?.startsWith(date) && b.status === 'verified')
-          const total = dayBookings.reduce((sum, b) => sum + (Number(b.class_price) || 2000), 0)
+          const total = dayBookings.reduce((sum, b) => sum + (Number(b.class_price) || Number(b.amount_charged) || 0), 0)
           return { date, total }
         })
 

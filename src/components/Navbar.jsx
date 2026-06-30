@@ -112,7 +112,7 @@ export default function Navbar() {
             onClick={() => setMenuOpen(false)}
             className="block w-full rounded-xl bg-[#2D6A4F] py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-[#245c43]"
           >
-            Book Consultation — PKR 2,000
+            Book Consultation
           </Link>
         </div>
       </div>

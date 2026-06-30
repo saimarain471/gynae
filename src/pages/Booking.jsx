@@ -1,5 +1,5 @@
 // Booking.jsx — redesigned consultation booking page
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabase'
 import { posthog } from '../lib/posthog'
 import { buildWhatsAppUrl } from '../lib/whatsapp'
 import CalcomEmbed from '../components/CalcomEmbed'
+import { useSiteSettings } from '../hooks/useSiteSettings'
 import {
   Video, Clock, MessageCircle, FileText, Heart,
   ShieldCheck, CreditCard, Copy, Check, GraduationCap,
@@ -71,6 +72,9 @@ export default function Booking() {
   const minDate = new Date().toISOString().split('T')[0]
   const consultationCalLink = import.meta.env.VITE_CALCOM_CONSULTATION_LINK?.trim() || ''
   const consultationCalNamespace = import.meta.env.VITE_CALCOM_NAMESPACE?.trim() || 'dr-zainab'
+  const { settings } = useSiteSettings()
+  const consultationFee = settings?.consultation_fee ?? 2000
+  const paymentOptions = useMemo(() => (settings?.payment_methods || []).filter((option) => option.active), [settings])
 
   const handleCopy = (text, id) => {
     navigator.clipboard.writeText(text)
@@ -146,6 +150,7 @@ export default function Booking() {
       transaction_id: values.transactionId,
       additional_notes: values.additionalNotes || '',
       cal_booking_uid: calBookingUid || null,
+      amount_charged: consultationFee,
       status: 'pending',
     }
 
@@ -210,7 +215,7 @@ export default function Booking() {
             </div>
             <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/15 px-4 py-2 text-sm font-medium text-white backdrop-blur-sm">
               <ShieldCheck size={14} />
-              PKR 2,000 only
+              PKR {consultationFee.toLocaleString()} only
             </div>
           </div>
 
@@ -402,68 +407,39 @@ export default function Booking() {
                   </div>
                   <span className="text-sm font-semibold text-[#1A1A2E]">Send consultation fee first</span>
                 </div>
-                <span className="text-lg font-bold text-[#2D6A4F]">PKR 2,000</span>
+                <span className="text-lg font-bold text-[#2D6A4F]">PKR {consultationFee.toLocaleString()}</span>
               </div>
 
               {/* Payment methods */}
               <div className="flex flex-col gap-2">
-                {/* JazzCash */}
-                <div className="flex items-center justify-between rounded-xl border border-gray-100 bg-white px-4 py-3">
-                  <div>
-                    <p className="text-sm font-medium text-[#1A1A2E]">JazzCash</p>
-                    <p className="font-mono text-xs text-[#6B7280]">0300-0000000</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleCopy('0300-0000000', 'jazzcash')}
-                    className="text-[#6B7280] hover:text-[#2D6A4F] transition"
-                  >
-                    {copiedId === 'jazzcash' ? (
-                      <Check size={13} className="text-green-600" />
-                    ) : (
-                      <Copy size={13} />
-                    )}
-                  </button>
-                </div>
-
-                {/* EasyPaisa */}
-                <div className="flex items-center justify-between rounded-xl border border-gray-100 bg-white px-4 py-3">
-                  <div>
-                    <p className="text-sm font-medium text-[#1A1A2E]">EasyPaisa</p>
-                    <p className="font-mono text-xs text-[#6B7280]">0301-0000000</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleCopy('0301-0000000', 'easypaisa')}
-                    className="text-[#6B7280] hover:text-[#2D6A4F] transition"
-                  >
-                    {copiedId === 'easypaisa' ? (
-                      <Check size={13} className="text-green-600" />
-                    ) : (
-                      <Copy size={13} />
-                    )}
-                  </button>
-                </div>
-
-                {/* Bank Transfer */}
-                <div className="flex items-center justify-between rounded-xl border border-gray-100 bg-white px-4 py-3">
-                  <div>
-                    <p className="text-sm font-medium text-[#1A1A2E]">HBL Bank</p>
-                    <p className="text-xs text-[#6B7280]">Dr. Zainab Mohsin</p>
-                    <p className="font-mono text-xs text-[#6B7280]">PK00HABB0000001234567890</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleCopy('PK00HABB0000001234567890', 'bank')}
-                    className="text-[#6B7280] hover:text-[#2D6A4F] transition flex-shrink-0"
-                  >
-                    {copiedId === 'bank' ? (
-                      <Check size={13} className="text-green-600" />
-                    ) : (
-                      <Copy size={13} />
-                    )}
-                  </button>
-                </div>
+                {paymentOptions.length > 0 ? paymentOptions.map((option) => {
+                  const key = option.method || option.value
+                  const label = option.method || 'Payment'
+                  const account = option.value || '—'
+                  return (
+                    <div key={key} className="flex items-center justify-between rounded-xl border border-gray-100 bg-white px-4 py-3">
+                      <div>
+                        <p className="text-sm font-medium text-[#1A1A2E]">{label}</p>
+                        <p className="font-mono text-xs text-[#6B7280]">{account}</p>
+                        {option.details && <p className="text-xs text-[#6B7280]">{option.details}</p>}
+                        {option.subtitle && <p className="text-xs text-[#6B7280]">{option.subtitle}</p>}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleCopy(account, key)}
+                        className="text-[#6B7280] hover:text-[#2D6A4F] transition"
+                      >
+                        {copiedId === key ? (
+                          <Check size={13} className="text-green-600" />
+                        ) : (
+                          <Copy size={13} />
+                        )}
+                      </button>
+                    </div>
+                  )
+                }) : (
+                  <div className="rounded-xl border border-gray-100 bg-white px-4 py-3 text-sm text-[#6B7280]">No active payment methods configured. Update admin settings.</div>
+                )}
               </div>
 
               {/* Info box */}
@@ -743,17 +719,16 @@ export default function Booking() {
                           className="w-full appearance-none rounded-xl border border-gray-200 px-4 py-3 text-sm transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]"
                         >
                           <option value="">Select payment method</option>
-                          <option value="JazzCash">JazzCash</option>
-                          <option value="EasyPaisa">EasyPaisa</option>
-                          <option value="Bank Transfer">Bank Transfer</option>
+                          {paymentOptions.length > 0 ? paymentOptions.map((option) => (
+                            <option key={option.method || option.value} value={option.method}>{option.method}</option>
+                          )) : (
+                            <option disabled>No payment methods available</option>
+                          )}
                         </select>
                         {paymentMethod && (
                           <div className="rounded-lg bg-[#E1F5EE] px-3 py-2 text-xs text-[#2D6A4F]">
-                            {paymentMethod === 'JazzCash'
-                              ? 'JazzCash: 0300-0000000 (Zainab Mohsin)'
-                              : paymentMethod === 'EasyPaisa'
-                                ? 'EasyPaisa: 0301-0000000 (Zainab Mohsin)'
-                                : 'HBL IBAN: PK00HABB0000001234567890 (Dr. Zainab Mohsin)'}
+                            {paymentOptions.find((option) => option.method === paymentMethod)?.value || ''}
+                            {paymentOptions.find((option) => option.method === paymentMethod)?.details ? ` (${paymentOptions.find((option) => option.method === paymentMethod)?.details})` : ''}
                           </div>
                         )}
                         {errors.paymentMethod && <p className="text-xs text-red-500">{errors.paymentMethod.message}</p>}
@@ -800,7 +775,7 @@ export default function Booking() {
                           </>
                         ) : (
                           <>
-                            Confirm Booking — PKR 2,000
+                            Confirm Booking — PKR {consultationFee.toLocaleString()}
                           </>
                         )}
                       </button>

@@ -87,7 +87,7 @@ export default function AdminBookingRow({ booking, onStatusChange }) {
         {/* Amount */}
         <td className="px-4 py-3 whitespace-nowrap">
           <p className="text-sm font-semibold text-[#2D6A4F]">
-            PKR {isClass ? (booking.class_price || '—') : '2,000'}
+            PKR {isClass ? (booking.class_price || '—') : (booking.amount_charged || '—')}
           </p>
         </td>
 

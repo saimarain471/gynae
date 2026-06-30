@@ -1,46 +1,26 @@
 import { useState } from 'react'
 import { Smartphone, Wallet, Landmark, Copy, ChevronDown, ChevronUp } from 'lucide-react'
 import { posthog } from '../lib/posthog'
+import { useSiteSettings } from '../hooks/useSiteSettings'
 
-const paymentOptions = [
-  {
-    method: 'JazzCash',
-    value: '0300-0000000',
-    details: 'Zainab Mohsin',
-    iconBg: '#E8F5E9',
-    iconColor: '#2D6A4F',
-    borderColor: '#2D6A4F',
-  },
-  {
-    method: 'EasyPaisa',
-    value: '0301-0000000',
-    details: 'Zainab Mohsin',
-    iconBg: '#E3F2FD',
-    iconColor: '#1565C0',
-    borderColor: '#2563EB',
-  },
-  {
-    method: 'Bank Transfer',
-    value: '1234-5678-9012-3456',
-    details: 'Dr. Zainab Mohsin',
-    subtitle: 'IBAN: PK00HABB0000001234567890',
-    branch: 'Rawalpindi Main Branch',
-    iconBg: '#FFF3E8',
-    iconColor: '#E65100',
-    borderColor: '#EA580C',
-  },
-]
+const iconMap = {
+  JazzCash: Smartphone,
+  EasyPaisa: Wallet,
+  'Bank Transfer': Landmark,
+}
 
 export default function PaymentInstructions() {
   const [copied, setCopied] = useState('')
   const [open, setOpen] = useState(false)
+  const { settings } = useSiteSettings()
+  const paymentOptions = (settings?.payment_methods || []).filter((option) => option.active)
 
   const handleCopy = async (method, value) => {
     if (!navigator.clipboard) return
     try {
       await navigator.clipboard.writeText(value)
       setCopied(method)
-      posthog.capture('account_number_copied', { method: method.toLowerCase().replace(' ', '_') })
+      posthog.capture('account_number_copied', { method: method.toLowerCase().replace(/\s+/g, '_') })
       window.setTimeout(() => setCopied(''), 2000)
     } catch (error) {
       console.error(error)
@@ -55,14 +35,13 @@ export default function PaymentInstructions() {
       </div>
 
       <div className="flex flex-col gap-3">
-        {paymentOptions.map((option) => {
-          const Icon = option.method === 'JazzCash' ? Smartphone : option.method === 'EasyPaisa' ? Wallet : Landmark
-
+        {paymentOptions.length > 0 ? paymentOptions.map((option) => {
+          const Icon = iconMap[option.method] || Landmark
           return (
-            <div key={option.method} className={`rounded-2xl border border-gray-100 bg-white p-4 shadow-sm ${option.borderColor ? 'border-l-4' : ''}`} style={{ borderLeftColor: option.borderColor }}>
+            <div key={option.method || option.value} className={`rounded-2xl border border-gray-100 bg-white p-4 shadow-sm ${option.value ? 'border-l-4' : ''}`} style={{ borderLeftColor: option.borderColor || '#52B788' }}>
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: option.iconBg, color: option.iconColor }}>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: option.iconBg || '#E1F5EE', color: option.iconColor || '#2D6A4F' }}>
                     <Icon size={18} />
                   </div>
                   <div>
@@ -84,7 +63,9 @@ export default function PaymentInstructions() {
               </button>
             </div>
           )
-        })}
+        }) : (
+          <div className="rounded-2xl border border-gray-100 bg-white p-4 text-sm text-[#6B7280]">No active payment methods configured. Please update admin settings.</div>
+        )}
       </div>
 
       <div className="mt-4 rounded-2xl border border-gray-100 bg-white p-3 shadow-sm">

@@ -34,8 +34,17 @@ create table if not exists consultation_bookings (
   payment_method text not null,
   transaction_id text not null,
   additional_notes text,
+  amount_charged integer,
   cal_booking_uid text,
   status text default 'pending'
+);
+
+create table if not exists site_settings (
+  id uuid default gen_random_uuid() primary key,
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now(),
+  consultation_fee integer not null default 2000,
+  payment_methods jsonb not null default '[]'::jsonb
 );
 
 create table if not exists blog_posts (

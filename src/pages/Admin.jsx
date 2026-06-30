@@ -6,7 +6,7 @@ import {
 import { supabase } from '../lib/supabase'
 import AdminOverview from '../components/admin/AdminOverview'
 import AdminClasses from '../components/admin/AdminClasses'
-
+import AdminSettings from '../components/admin/AdminSettings'
 const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'DrZainab@2025'
 
 function LoginScreen({ onSuccess }) {
@@ -138,6 +138,7 @@ export default function Admin() {
           {[
             { id: 'overview', label: 'Overview', icon: LayoutDashboard },
             { id: 'classes', label: 'Classes', icon: BookOpen },
+            { id: 'settings', label: 'Settings', icon: Lock },
           ].map((tab) => {
             const Icon = tab.icon
             return (
@@ -160,7 +161,13 @@ export default function Admin() {
           </div>
         )}
 
-        {activeTab === 'overview' ? <AdminOverview refreshKey={refreshKey} /> : <AdminClasses refreshKey={refreshKey} />}
+        {activeTab === 'overview' ? (
+          <AdminOverview refreshKey={refreshKey} />
+        ) : activeTab === 'classes' ? (
+          <AdminClasses refreshKey={refreshKey} />
+        ) : (
+          <AdminSettings refreshKey={refreshKey} />
+        )}
       </div>
     </div>
   )
