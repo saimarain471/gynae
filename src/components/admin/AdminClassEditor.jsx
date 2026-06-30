@@ -170,7 +170,7 @@ export default function AdminClassEditor({ classData, mode, onClose, onSaved }) 
       }
 
       if (mode === 'edit' && classData?.id) {
-        await updateClass(classData.id, payload)
+        await updateClass({ id: classData.id, ...payload })
       } else {
         await createClass(payload)
       }

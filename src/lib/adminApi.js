@@ -18,11 +18,22 @@ const adminFetch = async (action, payload) => {
     body: JSON.stringify({ action, payload }),
   })
 
-  const json = await response.json()
-  if (!response.ok) {
-    throw new Error(json?.error || 'Admin API request failed.')
+  const text = await response.text()
+  let json = null
+  if (text) {
+    try {
+      json = JSON.parse(text)
+    } catch (parseError) {
+      throw new Error(`Admin API returned invalid JSON: ${parseError.message}`)
+    }
   }
-  return json.data
+
+  if (!response.ok) {
+    const message = json?.error || json?.message || text || `Admin API request failed with status ${response.status}`
+    throw new Error(message)
+  }
+
+  return json?.data ?? null
 }
 
 export const createClass = async (payload) => adminFetch('create', payload)
