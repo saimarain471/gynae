@@ -1,0 +1,3 @@
+User-agent: *
+Disallow:
+Sitemap: https://gynae.vercel.app/sitemap.xml
