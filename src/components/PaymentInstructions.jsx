@@ -9,11 +9,12 @@ const iconMap = {
   'Bank Transfer': Landmark,
 }
 
-export default function PaymentInstructions() {
+export default function PaymentInstructions({ paymentMethods }) {
   const [copied, setCopied] = useState('')
   const [open, setOpen] = useState(false)
   const { settings } = useSiteSettings()
-  const paymentOptions = (settings?.payment_methods || []).filter((option) => option.active)
+  const sourceMethods = paymentMethods?.length ? paymentMethods : settings?.payment_methods || []
+  const paymentOptions = sourceMethods.filter((option) => option.active)
 
   const handleCopy = async (method, value) => {
     if (!navigator.clipboard) return

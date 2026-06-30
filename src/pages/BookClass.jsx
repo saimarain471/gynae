@@ -51,6 +51,13 @@ export default function BookClass() {
   const paymentMethod = useWatch({ control, name: 'paymentMethod' })
   const classCalLink = classData?.cal_link || import.meta.env.VITE_CALCOM_CLASS_LINK?.trim() || ''
   const classCalNamespace = import.meta.env.VITE_CALCOM_NAMESPACE?.trim() || 'dr-zainab'
+  const availablePaymentMethods = useMemo(() => {
+    const methods = Array.isArray(classData?.payment_methods) ? classData.payment_methods : []
+    return methods.filter((option) => option.active)
+  }, [classData])
+  const selectedPaymentMethod = useMemo(() => {
+    return availablePaymentMethods.find((option) => option.method === paymentMethod)
+  }, [availablePaymentMethods, paymentMethod])
 
   useEffect(() => {
     let isMounted = true
@@ -337,12 +344,30 @@ export default function BookClass() {
                     <label className="text-sm font-medium text-[#1A1A2E]">Payment Method</label>
                     <select {...register('paymentMethod')} className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-[#1A1A2E] transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]">
                       <option value="">Select payment method</option>
-                      <option value="JazzCash">JazzCash</option>
-                      <option value="EasyPaisa">EasyPaisa</option>
-                      <option value="Bank Transfer">Bank Transfer</option>
+                      {availablePaymentMethods.length > 0 ? (
+                        availablePaymentMethods.map((option) => (
+                          <option key={option.method + option.value} value={option.method}>{option.method}</option>
+                        ))
+                      ) : (
+                        [
+                          { method: 'JazzCash' },
+                          { method: 'EasyPaisa' },
+                          { method: 'Bank Transfer' },
+                        ].map((option) => (
+                          <option key={option.method} value={option.method}>{option.method}</option>
+                        ))
+                      )}
                     </select>
-                    {paymentMethod && paymentInfoMap[paymentMethod] && (
-                      <p className="text-xs italic text-[#6B7280]">{paymentInfoMap[paymentMethod]}</p>
+                    {paymentMethod && selectedPaymentMethod && (
+                      <div className="mt-2 rounded-xl bg-[#F8FAFC] p-3 text-xs text-[#475569]">
+                        <p className="font-semibold text-[#1F2937]">{selectedPaymentMethod.method}</p>
+                        <p>{selectedPaymentMethod.value}</p>
+                        {selectedPaymentMethod.details && <p>{selectedPaymentMethod.details}</p>}
+                        {selectedPaymentMethod.subtitle && <p>{selectedPaymentMethod.subtitle}</p>}
+                      </div>
+                    )}
+                    {paymentMethod && !selectedPaymentMethod && (
+                      <p className="text-xs italic text-[#6B7280]">Please use the payment details shown above for your selected method.</p>
                     )}
                     {errors.paymentMethod && <p className="text-xs text-red-500">{errors.paymentMethod.message}</p>}
                   </div>

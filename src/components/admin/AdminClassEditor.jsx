@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { X, Plus, Trash2 } from 'lucide-react'
-import { supabase } from '../../lib/supabase'
+import { createClass, updateClass } from '../../lib/adminApi'
+
+const defaultPaymentMethods = [
+  { method: 'JazzCash', value: '0300-0000000', details: 'Zainab Mohsin', subtitle: '', active: true },
+  { method: 'EasyPaisa', value: '0301-0000000', details: 'Zainab Mohsin', subtitle: '', active: true },
+  { method: 'Bank Transfer', value: 'PK00HABB0000001234567890', details: 'Dr. Zainab Mohsin', subtitle: 'IBAN', active: true },
+]
 
 const defaultForm = {
   title: '',
@@ -20,6 +26,7 @@ const defaultForm = {
   visible: true,
   featured: false,
   cal_link: '',
+  payment_methods: defaultPaymentMethods,
 }
 
 function ToggleRow({ label, value, onChange }) {
@@ -64,6 +71,7 @@ export default function AdminClassEditor({ classData, mode, onClose, onSaved }) 
         visible: classData.visible !== false,
         featured: Boolean(classData.featured),
         cal_link: classData.cal_link || '',
+        payment_methods: Array.isArray(classData.payment_methods) && classData.payment_methods.length > 0 ? classData.payment_methods : defaultPaymentMethods,
       })
       setSlots(classData.schedule_slots || [])
     } else {
@@ -94,6 +102,46 @@ export default function AdminClassEditor({ classData, mode, onClose, onSaved }) 
     setSlots((prev) => prev.filter((_, itemIndex) => itemIndex !== index))
   }
 
+  const updatePaymentMethod = (index, field, value) => {
+    setForm((prev) => {
+      const next = [...prev.payment_methods]
+      next[index] = { ...next[index], [field]: value }
+      return { ...prev, payment_methods: next }
+    })
+  }
+
+  const togglePaymentMethodActive = (index) => {
+    setForm((prev) => {
+      const next = [...prev.payment_methods]
+      next[index] = { ...next[index], active: !next[index].active }
+      return { ...prev, payment_methods: next }
+    })
+  }
+
+  const addPaymentMethod = () => {
+    setForm((prev) => ({
+      ...prev,
+      payment_methods: [...prev.payment_methods, { method: '', value: '', details: '', subtitle: '', active: true }],
+    }))
+  }
+
+  const removePaymentMethod = (index) => {
+    setForm((prev) => ({
+      ...prev,
+      payment_methods: prev.payment_methods.filter((_, itemIndex) => itemIndex !== index),
+    }))
+  }
+
+  const createSlug = (title) => {
+    const base = title
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '')
+      .replace(/^-+|-+$/g, '')
+    return `${base || 'class'}-${Date.now()}`
+  }
+
   const handleSave = async () => {
     setSaving(true)
     setError('')
@@ -117,29 +165,7 @@ export default function AdminClassEditor({ classData, mode, onClose, onSaved }) 
       featured: Boolean(form.featured),
       schedule_slots: slots,
       cal_link: form.cal_link.trim() || null,
-      updated_at: new Date().toISOString(),
-    }
-
-    if (mode === 'create') {
-      payload.slug = form.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-      const { error } = await supabase.from('classes').insert([payload])
-      if (error) {
-        setError(error.message)
-        setSaving(false)
-        return
-      }
-    } else {
-      const { error } = await supabase.from('classes').update(payload).eq('id', classData.id)
-      if (error) {
-        setError(error.message)
-        setSaving(false)
-        return
-      }
-    }
-
-    setSaving(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 1800)
+      payment_methods: Array.isArray(form.payment_methods) ? form.payment_methods : defaultPaymentMethods,
     onSaved()
     onClose()
   }
@@ -266,6 +292,48 @@ export default function AdminClassEditor({ classData, mode, onClose, onSaved }) 
               <label className="text-sm font-medium text-[#1A1A2E]">Cal.com booking link (optional)</label>
               <input value={form.cal_link} onChange={(e) => updateField('cal_link', e.target.value)} placeholder="drzainab/pregnancy-week-by-week" className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
               <p className="text-[11px] text-[#6B7280]">If set, this overrides the manual schedule above with live availability.</p>
+            </div>
+
+            <div className="rounded-2xl border border-gray-100 bg-[#F9FAFB] p-4">
+              <div className="mb-2 flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-[#1A1A2E]">Class Payment Methods</h3>
+                <button type="button" onClick={addPaymentMethod} className="rounded-xl bg-[#2D6A4F] px-3 py-2 text-xs font-semibold text-white">
+                  <Plus size={14} /> Add payment method
+                </button>
+              </div>
+              <p className="mb-3 text-xs text-[#6B7280]">These payment methods will be shown for this class only.</p>
+              <div className="space-y-3">
+                {form.payment_methods.map((method, index) => (
+                  <div key={`${method.method}-${index}`} className="rounded-2xl border border-gray-200 bg-white p-4">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-sm font-medium text-[#1A1A2E]">Method</label>
+                        <input value={method.method} onChange={(e) => updatePaymentMethod(index, 'method', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-sm font-medium text-[#1A1A2E]">Account/ID</label>
+                        <input value={method.value} onChange={(e) => updatePaymentMethod(index, 'value', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-sm font-medium text-[#1A1A2E]">Details</label>
+                        <input value={method.details} onChange={(e) => updatePaymentMethod(index, 'details', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-sm font-medium text-[#1A1A2E]">Subtitle</label>
+                        <input value={method.subtitle} onChange={(e) => updatePaymentMethod(index, 'subtitle', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+                      </div>
+                    </div>
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <button type="button" onClick={() => togglePaymentMethodActive(index)} className={`rounded-xl px-3 py-2 text-xs font-semibold ${method.active ? 'bg-[#2D6A4F] text-white' : 'bg-gray-100 text-[#6B7280]'}`}>
+                        {method.active ? 'Active' : 'Inactive'}
+                      </button>
+                      <button type="button" onClick={() => removePaymentMethod(index)} className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600">
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {error && <p className="text-sm text-red-600">{error}</p>}

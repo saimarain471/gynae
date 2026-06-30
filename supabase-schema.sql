@@ -106,6 +106,7 @@ create table if not exists classes (
   visible boolean not null default true,
   featured boolean not null default false,
   schedule_slots jsonb not null default '[]'::jsonb,
+  payment_methods jsonb not null default '[]'::jsonb,
   cal_link text
 );
 

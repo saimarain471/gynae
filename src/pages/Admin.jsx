@@ -18,6 +18,7 @@ function LoginScreen({ onSuccess }) {
     e.preventDefault()
     if (pwInput === ADMIN_PASSWORD) {
       sessionStorage.setItem('admin_authed', 'true')
+      sessionStorage.setItem('admin_password', pwInput)
       onSuccess()
     } else {
       setPwError(true)
@@ -97,6 +98,7 @@ export default function Admin() {
 
   const handleLogout = () => {
     sessionStorage.removeItem('admin_authed')
+    sessionStorage.removeItem('admin_password')
     setAuthed(false)
   }
 
