@@ -8,12 +8,18 @@ import {
   ChevronRight,
 } from 'lucide-react'
 import GynaeBackground from '../components/GynaeBackground'
+import SEO from '../components/SEO'
 
 export default function About() {
   const [imgError, setImgError] = useState(false)
 
   return (
     <>
+      <SEO
+        title="About Dr. Zainab Mohsin"
+        description="Meet Dr. Zainab Mohsin — gynecologist offering pregnancy classes, newborn care, and consultations across Pakistan."
+        url="https://gynae.vercel.app/about"
+      />
       <section className="relative overflow-hidden bg-gradient-to-br from-[#1a3d2e] via-[#2D6A4F] to-[#52B788] py-20 md:py-28">
         <GynaeBackground variant="default" />
         <div className="relative z-10 mx-auto grid max-w-6xl gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:px-8 lg:items-center">

@@ -9,6 +9,7 @@ import { posthog } from '../lib/posthog'
 import { buildWhatsAppUrl } from '../lib/whatsapp'
 import PaymentInstructions from '../components/PaymentInstructions'
 import CalcomEmbed from '../components/CalcomEmbed'
+import SEO from '../components/SEO'
 
 const stepOneSchema = z.object({
   fullName: z.string().min(3, 'Please enter your full name.'),
@@ -224,6 +225,11 @@ export default function BookClass() {
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
+      <SEO
+        title={classData ? `Enroll: ${classData.title}` : 'Enroll in Class'}
+        description={classData ? `Enroll in ${classData.title} — PKR ${classData.price}` : 'Enroll in our online classes'}
+        url={classData ? `https://gynae.vercel.app/book-class/${classData.id}` : 'https://gynae.vercel.app/book-class'}
+      />
       <div className="space-y-8">
         <div className="space-y-3 rounded-[2rem] bg-white p-8 shadow-sm">
           <h1 className="text-3xl font-semibold text-[#1A1A2E]">Enroll in {classData.title}</h1>

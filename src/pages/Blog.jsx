@@ -5,6 +5,7 @@ import { posthog } from '../lib/posthog'
 import BlogCard from '../components/BlogCard'
 import BlogSkeleton from '../components/BlogSkeleton'
 import { Sparkles, ArrowRight } from 'lucide-react'
+import SEO from '../components/SEO'
 
 const CATEGORIES = ['All', 'Prenatal', 'Postnatal', 'Baby Care', 'General']
 
@@ -46,8 +47,11 @@ export default function Blog() {
 
   return (
     <div className="min-h-screen bg-[#FAFAF8]">
-      {/* SEO */}
-      <title>Health Tips &amp; Guides — Dr. Zainab Mohsin</title>
+      <SEO
+        title="Health Tips & Guides — Dr. Zainab Mohsin"
+        description="Read expert articles on pregnancy, newborn care, and women's health by Dr. Zainab Mohsin."
+        url="https://gynae.vercel.app/blog"
+      />
 
       {/* Page header */}
       <section className="bg-[#E1F5EE] py-14">

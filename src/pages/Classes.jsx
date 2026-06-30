@@ -10,6 +10,7 @@ import { classes as fallbackClasses } from '../data/classes'
 import { posthog } from '../lib/posthog'
 import GynaeBackground from '../components/GynaeBackground'
 import { supabase } from '../lib/supabase'
+import SEO from '../components/SEO'
 
 const filters = ['All', 'Prenatal', 'Postnatal', 'Baby Care']
 
@@ -85,6 +86,11 @@ export default function Classes() {
 
   return (
     <>
+      <SEO
+        title="Online Pregnancy & Baby Classes"
+        description="Doctor-led online pregnancy and newborn care classes by Dr. Zainab Mohsin. Learn at your pace — enroll today."
+        url="https://gynae.vercel.app/classes"
+      />
       <section className="relative overflow-hidden bg-gradient-to-br from-[#FAFAF8] via-[#E1F5EE] to-[#FAFAF8] py-16 md:py-20">
         <GynaeBackground variant="classes" />
         <div className="relative z-10 mx-auto max-w-6xl px-4 text-center sm:px-6 lg:px-8">

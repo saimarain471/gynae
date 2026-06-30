@@ -4,6 +4,7 @@ import { posthog } from '../lib/posthog'
 import TestimonialCard from '../components/TestimonialCard'
 import StarRating from '../components/StarRating'
 import { Star, CheckCircle, MessageSquarePlus } from 'lucide-react'
+import SEO from '../components/SEO'
 
 const SERVICE_TYPES = [
   'Consultation',
@@ -128,6 +129,11 @@ export default function Testimonials() {
 
   return (
     <div className="min-h-screen bg-[#FAFAF8]">
+      <SEO
+        title="Patient Stories — Reviews for Dr. Zainab"
+        description="Verified patient testimonials and reviews for Dr. Zainab Mohsin — real experiences from mothers across Pakistan."
+        url="https://gynae.vercel.app/testimonials"
+      />
       {/* Page header */}
       <section className="bg-[#E1F5EE] py-14">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">

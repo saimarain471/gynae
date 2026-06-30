@@ -8,6 +8,7 @@ import { posthog } from '../lib/posthog'
 import { buildWhatsAppUrl } from '../lib/whatsapp'
 import CalcomEmbed from '../components/CalcomEmbed'
 import { useSiteSettings } from '../hooks/useSiteSettings'
+import SEO from '../components/SEO'
 import {
   Video, Clock, MessageCircle, FileText, Heart,
   ShieldCheck, CreditCard, Copy, Check, GraduationCap,
@@ -174,6 +175,11 @@ export default function Booking() {
 
   return (
     <>
+      <SEO
+        title="Book Consultation — Dr. Zainab Mohsin"
+        description="Book a 1-on-1 video consultation with Dr. Zainab Mohsin for pregnancy and women's health advice."
+        url="https://gynae.vercel.app/booking"
+      />
       {/* HERO BANNER */}
       <div className="relative w-full overflow-hidden bg-gradient-to-br from-[#2D6A4F] via-[#3a7d5e] to-[#52B788] py-14 md:py-20">
         {/* Decorative circles */}

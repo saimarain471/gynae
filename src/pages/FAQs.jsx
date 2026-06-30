@@ -4,6 +4,7 @@ import { Search, HelpCircle, ArrowRight } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { posthog } from '../lib/posthog'
 import FAQAccordion from '../components/FAQAccordion'
+import SEO from '../components/SEO'
 
 const CATEGORIES = ['All', 'Appointments', 'Pregnancy', 'Baby Care', 'Postnatal', 'General']
 
@@ -76,6 +77,11 @@ export default function FAQs() {
 
   return (
     <div className="min-h-screen bg-[#FAFAF8]">
+      <SEO
+        title="FAQs — Pregnancy & Baby Care"
+        description="Answers to frequently asked questions about pregnancy, classes, bookings, and consultations with Dr. Zainab Mohsin."
+        url="https://gynae.vercel.app/faqs"
+      />
       {/* Page header */}
       <section className="bg-[#E1F5EE] py-14">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">

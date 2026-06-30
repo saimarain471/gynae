@@ -1,10 +1,16 @@
 import { Link } from 'react-router-dom'
 import { CheckCircle2 } from 'lucide-react'
 import { buildWhatsAppUrl } from '../lib/whatsapp'
+import SEO from '../components/SEO'
 
 export default function ThankYou() {
   return (
     <main className="mx-auto max-w-4xl px-6 py-20 lg:px-8">
+      <SEO
+        title="Booking Received — Thank you"
+        description="Thank you — your booking has been received. Dr. Zainab will verify payment and contact you via WhatsApp."
+        url="https://gynae.vercel.app/thank-you"
+      />
       <div className="rounded-[2rem] bg-white p-12 text-center shadow-sm">
         <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-green-100 text-green-700">
           <CheckCircle2 className="h-10 w-10" />
