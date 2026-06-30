@@ -24,7 +24,7 @@ export default function AdminSettings({ refreshKey = 0 }) {
       setLoading(true)
       setError('')
       try {
-        const { data, error } = await supabase.from('site_settings').select('*').limit(1).maybeSingle()
+        const { data, error } = await supabase.from('site_settings').select('*').order('updated_at', { ascending: false }).limit(1).maybeSingle()
         if (!isMounted) return
         if (error) throw error
 

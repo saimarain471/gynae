@@ -49,6 +49,7 @@ export function useSiteSettings() {
       const { data, error: fetchError } = await supabase
         .from('site_settings')
         .select('*')
+        .order('updated_at', { ascending: false })
         .limit(1)
         .maybeSingle()
 
