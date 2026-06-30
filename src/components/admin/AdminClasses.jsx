@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Plus, Edit2, Eye, EyeOff, Trash2 } from 'lucide-react'
+import { supabase } from '../../lib/supabase'
 import { toggleClassVisible, deleteClass } from '../../lib/adminApi'
 import AdminClassEditor from './AdminClassEditor'
 
@@ -99,19 +100,17 @@ export default function AdminClasses({ refreshKey = 0 }) {
             </div>
           ))}
         </div>
+      ) : classes.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-gray-200 bg-white px-6 py-10 text-center text-sm text-[#6B7280]">
+          <p className="text-base font-semibold text-[#1A1A2E]">No classes found.</p>
+          <p className="mt-2">Create a new class to make it live on the website.</p>
+        </div>
       ) : (
-        <>
-          {classes.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-gray-200 bg-white px-6 py-10 text-center text-sm text-[#6B7280]">
-              <p className="text-base font-semibold text-[#1A1A2E]">No classes found.</p>
-              <p className="mt-2">Create a new class to make it live on the website.</p>
-            </div>
-          ) : (
-            <div className="grid gap-5 md:grid-cols-2">
-              {classes.map((item) => {
-                const progress = Math.min(100, (((item.seats_taken || 0) / Math.max(1, item.seats_total || 1)) * 100))
-                return (
-                  <div key={item.id} className="overflow-hidden rounded-2xl border border-gray-100 bg-white">
+        <div className="grid gap-5 md:grid-cols-2">
+          {classes.map((item) => {
+            const progress = Math.min(100, (((item.seats_taken || 0) / Math.max(1, item.seats_total || 1)) * 100))
+            return (
+              <div key={item.id} className="overflow-hidden rounded-2xl border border-gray-100 bg-white">
                 <div className={`relative h-20 bg-gradient-to-r ${bannerStyles[item.category] || bannerStyles.Prenatal}`}>
                   <div className="absolute left-3 top-3 rounded-full bg-white/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white backdrop-blur-sm">
                     {item.category || 'Prenatal'}

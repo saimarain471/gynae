@@ -146,28 +146,43 @@ export default function AdminClassEditor({ classData, mode, onClose, onSaved }) 
     setSaving(true)
     setError('')
 
-    const payload = {
-      title: form.title.trim(),
-      description: form.description.trim(),
-      category: form.category,
-      price: Number(form.price) || 0,
-      discount_price: form.discount_price ? Number(form.discount_price) : null,
-      modules: Number(form.modules) || 1,
-      duration: form.duration.trim(),
-      teacher: form.teacher.trim() || 'Dr. Zainab Mohsin',
-      language: form.language.trim() || 'Urdu/English',
-      thumbnail_url: form.thumbnail_url.trim() || null,
-      seats_total: Number(form.seats_total) || 50,
-      start_date: form.start_date || null,
-      end_date: form.end_date || null,
-      certificate: Boolean(form.certificate),
-      visible: Boolean(form.visible),
-      featured: Boolean(form.featured),
-      schedule_slots: slots,
-      cal_link: form.cal_link.trim() || null,
-      payment_methods: Array.isArray(form.payment_methods) ? form.payment_methods : defaultPaymentMethods,
-    onSaved()
-    onClose()
+    try {
+      const payload = {
+        title: form.title.trim(),
+        description: form.description.trim(),
+        category: form.category,
+        price: Number(form.price) || 0,
+        discount_price: form.discount_price ? Number(form.discount_price) : null,
+        modules: Number(form.modules) || 1,
+        duration: form.duration.trim(),
+        teacher: form.teacher.trim() || 'Dr. Zainab Mohsin',
+        language: form.language.trim() || 'Urdu/English',
+        thumbnail_url: form.thumbnail_url.trim() || null,
+        seats_total: Number(form.seats_total) || 50,
+        start_date: form.start_date || null,
+        end_date: form.end_date || null,
+        certificate: Boolean(form.certificate),
+        visible: Boolean(form.visible),
+        featured: Boolean(form.featured),
+        schedule_slots: slots,
+        cal_link: form.cal_link.trim() || null,
+        payment_methods: Array.isArray(form.payment_methods) ? form.payment_methods : defaultPaymentMethods,
+      }
+
+      if (mode === 'edit' && classData?.id) {
+        await updateClass(classData.id, payload)
+      } else {
+        await createClass(payload)
+      }
+
+      setSaved(true)
+      onSaved()
+      onClose()
+    } catch (err) {
+      setError(err.message || 'Unable to save class.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
