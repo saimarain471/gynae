@@ -1,11 +1,43 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { classes } from '../data/classes'
+import { classes as fallbackClasses } from '../data/classes'
 import { posthog } from '../lib/posthog'
+import { supabase } from '../lib/supabase'
 
 export default function ClassDetail() {
   const { id } = useParams()
-  const classData = classes.find((item) => item.id === Number(id))
+  const [classData, setClassData] = useState(null)
+
+  useEffect(() => {
+    let isMounted = true
+
+    async function fetchClass() {
+      try {
+        const { data, error } = await supabase.from('classes').select('*').eq('id', id).maybeSingle()
+        if (!isMounted) return
+        if (!error && data) {
+          setClassData({
+            ...data,
+            lessons: data.modules || data.lessons || 1,
+            price: data.price,
+            priceLabel: `PKR ${Number(data.price || 0).toLocaleString()}`,
+          })
+        } else {
+          const fallback = fallbackClasses.find((item) => item.id === Number(id))
+          setClassData(fallback || null)
+        }
+      } catch (error) {
+        if (!isMounted) return
+        const fallback = fallbackClasses.find((item) => item.id === Number(id))
+        setClassData(fallback || null)
+      }
+    }
+
+    fetchClass()
+    return () => {
+      isMounted = false
+    }
+  }, [id])
 
   useEffect(() => {
     if (classData) {

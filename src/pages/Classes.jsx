@@ -2,29 +2,74 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
-  BookOpen, PlayCircle, ShieldCheck, Smartphone, Clock,
-  ChevronRight, Baby, Heart, Star, Users, MessageCircle,
+  BookOpen, PlayCircle, ShieldCheck, Smartphone,
+  ChevronRight, Baby, Heart, Star, MessageCircle,
 } from 'lucide-react'
 import ClassCard from '../components/ClassCard'
-import { classes } from '../data/classes'
+import { classes as fallbackClasses } from '../data/classes'
 import { posthog } from '../lib/posthog'
 import GynaeBackground from '../components/GynaeBackground'
+import { supabase } from '../lib/supabase'
 
 const filters = ['All', 'Prenatal', 'Postnatal', 'Baby Care']
 
 export default function Classes() {
   const [activeFilter, setActiveFilter] = useState('All')
   const [loading, setLoading] = useState(true)
+  const [liveClasses, setLiveClasses] = useState([])
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 800)
-    return () => clearTimeout(timer)
+    let isMounted = true
+
+    async function fetchClasses() {
+      try {
+        const { data, error } = await supabase.from('classes').select('*').eq('visible', true).order('created_at', { ascending: false })
+        if (!isMounted) return
+        if (!error && data) {
+          const mapped = data.map((item) => ({
+            ...item,
+            id: item.id,
+            title: item.title,
+            category: item.category,
+            description: item.description,
+            duration: item.duration,
+            lessons: item.modules || item.lessons || 1,
+            price: item.price,
+            priceLabel: `PKR ${Number(item.price || 0).toLocaleString()}`,
+            image: item.thumbnail_url || null,
+          }))
+          setLiveClasses(mapped)
+        } else {
+          setLiveClasses([])
+        }
+      } catch (error) {
+        if (!isMounted) return
+        setLiveClasses([])
+      } finally {
+        if (isMounted) setLoading(false)
+      }
+    }
+
+    fetchClasses()
+    const timer = setTimeout(() => {
+      if (isMounted) setLoading(false)
+    }, 800)
+
+    return () => {
+      isMounted = false
+      clearTimeout(timer)
+    }
   }, [])
+
+  const classes = useMemo(() => {
+    if (liveClasses.length > 0) return liveClasses
+    return fallbackClasses
+  }, [liveClasses])
 
   const filteredClasses = useMemo(() => {
     if (activeFilter === 'All') return classes
     return classes.filter((item) => item.category === activeFilter)
-  }, [activeFilter])
+  }, [activeFilter, classes])
 
   const handleFilter = (value) => {
     setActiveFilter(value)

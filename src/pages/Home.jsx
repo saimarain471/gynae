@@ -4,7 +4,7 @@ import HeroSection from '../components/HeroSection'
 import ClassCard from '../components/ClassCard'
 import TestimonialCard from '../components/TestimonialCard'
 import FAQAccordion from '../components/FAQAccordion'
-import { classes } from '../data/classes'
+import { classes as fallbackClasses } from '../data/classes'
 import { supabase } from '../lib/supabase'
 import { Star, HelpCircle, ArrowRight } from 'lucide-react'
 
@@ -17,6 +17,7 @@ const stats = [
 export default function Home() {
   const [featuredTestimonials, setFeaturedTestimonials] = useState([])
   const [topFaqs, setTopFaqs] = useState([])
+  const [featuredClasses, setFeaturedClasses] = useState([])
   const [openFaqId, setOpenFaqId] = useState(null)
 
   async function fetchFeaturedTestimonials() {
@@ -52,10 +53,25 @@ export default function Home() {
     setTopFaqs(data || [])
   }
 
+  async function fetchFeaturedClasses() {
+    const { data } = await supabase.from('classes').select('*').eq('visible', true).order('created_at', { ascending: false }).limit(3)
+    if (data && data.length > 0) {
+      setFeaturedClasses(data.map((item) => ({
+        ...item,
+        lessons: item.modules || item.lessons || 1,
+        price: item.price,
+        priceLabel: `PKR ${Number(item.price || 0).toLocaleString()}`,
+      })))
+    } else {
+      setFeaturedClasses(fallbackClasses.slice(0, 3))
+    }
+  }
+
   useEffect(() => {
     const timer = window.setTimeout(() => {
       fetchFeaturedTestimonials()
       fetchTopFaqs()
+      fetchFeaturedClasses()
     }, 0)
     return () => window.clearTimeout(timer)
   }, [])
@@ -109,7 +125,7 @@ export default function Home() {
           </Link>
         </div>
         <div className="mt-8 grid gap-6 md:grid-cols-3">
-          {classes.slice(0, 3).map((classData) => (
+          {featuredClasses.slice(0, 3).map((classData) => (
             <ClassCard key={classData.id} classData={classData} />
           ))}
         </div>

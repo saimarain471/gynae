@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import { ShieldCheck, Check, CheckCircle2 } from 'lucide-react'
-import { classes } from '../data/classes'
+import { classes as fallbackClasses } from '../data/classes'
 import { supabase } from '../lib/supabase'
 import { posthog } from '../lib/posthog'
 import { buildWhatsAppUrl } from '../lib/whatsapp'
@@ -26,7 +26,7 @@ const stepTwoSchema = z.object({
 export default function BookClass() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const classData = useMemo(() => classes.find((item) => item.id === Number(id)), [id])
+  const [classData, setClassData] = useState(null)
   const [submitted, setSubmitted] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const [whatsappUrl, setWhatsappUrl] = useState('')
@@ -49,9 +49,42 @@ export default function BookClass() {
   const paymentMethod = useWatch({ control, name: 'paymentMethod' })
 
   useEffect(() => {
-    const timer = setTimeout(() => setFormReady(true), 600)
-    return () => clearTimeout(timer)
-  }, [])
+    let isMounted = true
+
+    async function fetchClass() {
+      try {
+        const { data, error } = await supabase.from('classes').select('*').eq('id', id).maybeSingle()
+        if (!isMounted) return
+        if (!error && data) {
+          setClassData({
+            ...data,
+            lessons: data.modules || data.lessons || 1,
+            price: data.price,
+            priceLabel: `PKR ${Number(data.price || 0).toLocaleString()}`,
+          })
+        } else {
+          const fallback = fallbackClasses.find((item) => item.id === Number(id))
+          setClassData(fallback || null)
+        }
+      } catch (error) {
+        if (!isMounted) return
+        const fallback = fallbackClasses.find((item) => item.id === Number(id))
+        setClassData(fallback || null)
+      } finally {
+        if (isMounted) setFormReady(true)
+      }
+    }
+
+    fetchClass()
+    const timer = setTimeout(() => {
+      if (isMounted) setFormReady(true)
+    }, 600)
+
+    return () => {
+      isMounted = false
+      clearTimeout(timer)
+    }
+  }, [id])
 
   useEffect(() => {
     if (!classData) return
