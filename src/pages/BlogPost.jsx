@@ -93,12 +93,6 @@ export default function BlogPost() {
 
   useEffect(() => {
     if (post) {
-      // Update document title and meta description for SEO
-      document.title = `${post.title} — Dr. Zainab Mohsin`
-      document
-        .querySelector('meta[name="description"]')
-        ?.setAttribute('content', post.excerpt)
-
       // Track PostHog event
       posthog.capture('blog_post_viewed', {
         slug,
@@ -177,6 +171,7 @@ export default function BlogPost() {
 
   return (
     <div className="min-h-screen bg-[#FAFAF8]">
+      <SEO title={post.title} description={post.excerpt} url={`https://gynae.vercel.app/blog/${post.slug}`} image={post.cover_image_url} />
       {/* Breadcrumb */}
       <div className="bg-white border-b border-gray-100">
         <div className="mx-auto max-w-3xl px-4 py-3 flex items-center gap-1.5 text-xs text-[#6B7280]">

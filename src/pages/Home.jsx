@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import SEO from '../components/SEO'
 import HeroSection from '../components/HeroSection'
 import ClassCard from '../components/ClassCard'
 import TestimonialCard from '../components/TestimonialCard'
@@ -81,6 +82,11 @@ export default function Home() {
 
   return (
     <main className="space-y-16">
+      <SEO
+        title="Home"
+        description="Online pregnancy classes, newborn care, and breastfeeding guidance by Dr. Zainab Mohsin. Book courses and consultations across Pakistan."
+        url="https://gynae.vercel.app/"
+      />
       <HeroSection />
 
       {/* Stats */}

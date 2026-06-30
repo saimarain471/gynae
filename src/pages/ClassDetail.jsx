@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { classes as fallbackClasses } from '../data/classes'
 import { posthog } from '../lib/posthog'
 import { supabase } from '../lib/supabase'
+import SEO from '../components/SEO'
 
 export default function ClassDetail() {
   const { id } = useParams()
@@ -61,6 +62,12 @@ export default function ClassDetail() {
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
+      <SEO
+        title={classData.title}
+        description={classData.description}
+        url={`https://gynae.vercel.app/classes/${classData.id}`}
+        image={classData.thumbnail_url}
+      />
       <div className="grid gap-10 lg:grid-cols-[2fr_1fr]">
         <div className="space-y-8 rounded-[2rem] bg-white p-8 shadow-sm">
           <div>
