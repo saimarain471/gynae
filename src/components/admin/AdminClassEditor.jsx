@@ -78,7 +78,7 @@ export default function AdminClassEditor({ classData, mode, onClose, onSaved }) 
         certificate: Boolean(classData.certificate),
         visible: classData.visible !== false,
         featured: Boolean(classData.featured),
-        cal_link: classData.cal_link || '',
+        cal_link: normalizeCalLink(classData.cal_link) || '',
         payment_methods: Array.isArray(classData.payment_methods) && classData.payment_methods.length > 0 ? classData.payment_methods : defaultPaymentMethods,
         meta_title: classData.meta_title || '',
         meta_description: classData.meta_description || '',
@@ -96,6 +96,16 @@ export default function AdminClassEditor({ classData, mode, onClose, onSaved }) 
   }, [classData])
 
   const titleText = useMemo(() => (mode === 'create' ? 'Add New Class' : 'Edit Class'), [mode])
+
+  const normalizeCalLink = (link) => {
+    if (!link || typeof link !== 'string') return ''
+    return link
+      .trim()
+      .replace(/^"|"$/g, '')
+      .replace(/^https?:\/\/(app\.)?cal\.com\//i, '')
+      .replace(/^cal\.com\//i, '')
+      .replace(/^\/|\/$/g, '')
+  }
 
   const updateField = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -180,7 +190,7 @@ export default function AdminClassEditor({ classData, mode, onClose, onSaved }) 
         visible: Boolean(form.visible),
         featured: Boolean(form.featured),
         schedule_slots: slots,
-        cal_link: form.cal_link.trim() || null,
+        cal_link: normalizeCalLink(form.cal_link) || null,
         payment_methods: Array.isArray(form.payment_methods) ? form.payment_methods : defaultPaymentMethods,
         meta_title: form.meta_title?.trim() || null,
         meta_description: form.meta_description?.trim() || null,

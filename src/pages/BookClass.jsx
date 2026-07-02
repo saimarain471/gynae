@@ -9,6 +9,7 @@ import { posthog } from '../lib/posthog'
 import { buildWhatsAppUrl } from '../lib/whatsapp'
 import PaymentInstructions from '../components/PaymentInstructions'
 import CalcomEmbed from '../components/CalcomEmbed'
+import { normalizeCalLink } from '../hooks/useSiteSettings'
 import { SmoothInput } from '../components/SmoothInput'
 import SEO from '../components/SEO'
 
@@ -60,7 +61,7 @@ export default function BookClass() {
   })
 
   const paymentMethod = useWatch({ control, name: 'paymentMethod' })
-  const classCalLink = classData?.cal_link || import.meta.env.VITE_CALCOM_CLASS_LINK?.trim() || ''
+  const classCalLink = normalizeCalLink(classData?.cal_link) || import.meta.env.VITE_CALCOM_CLASS_LINK?.trim() || ''
   const classCalNamespace = import.meta.env.VITE_CALCOM_NAMESPACE?.trim() || 'dr-zainab'
   const availablePaymentMethods = useMemo(() => {
     const methods = Array.isArray(classData?.payment_methods) ? classData.payment_methods : []
