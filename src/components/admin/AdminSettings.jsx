@@ -115,7 +115,7 @@ export default function AdminSettings({ refreshKey = 0 }) {
         <div className="mt-6 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
           <div className="space-y-3">
             <label className="text-sm font-medium text-[#1A1A2E]">Consultation fee (PKR)</label>
-            <input
+            <SmoothInput
               type="number"
               min="1"
               value={consultationFee}
@@ -151,7 +151,7 @@ export default function AdminSettings({ refreshKey = 0 }) {
                 <div className="grid flex-1 gap-3 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr]">
                   <label className="flex flex-col gap-2 text-sm font-medium text-[#1A1A2E]">
                     Method name
-                    <input
+                    <SmoothInput
                       value={method.method}
                       onChange={(e) => updateMethod(index, 'method', e.target.value)}
                       placeholder="JazzCash"
@@ -160,7 +160,7 @@ export default function AdminSettings({ refreshKey = 0 }) {
                   </label>
                   <label className="flex flex-col gap-2 text-sm font-medium text-[#1A1A2E]">
                     Account number / ID
-                    <input
+                    <SmoothInput
                       value={method.value}
                       onChange={(e) => updateMethod(index, 'value', e.target.value)}
                       placeholder="0300-0000000"
@@ -169,7 +169,7 @@ export default function AdminSettings({ refreshKey = 0 }) {
                   </label>
                   <label className="flex flex-col gap-2 text-sm font-medium text-[#1A1A2E]">
                     Details / name
-                    <input
+                    <SmoothInput
                       value={method.details}
                       onChange={(e) => updateMethod(index, 'details', e.target.value)}
                       placeholder="Dr. Zainab Mohsin"
@@ -178,7 +178,7 @@ export default function AdminSettings({ refreshKey = 0 }) {
                   </label>
                   <label className="flex flex-col gap-2 text-sm font-medium text-[#1A1A2E]">
                     Subtitle
-                    <input
+                    <SmoothInput
                       value={method.subtitle}
                       onChange={(e) => updateMethod(index, 'subtitle', e.target.value)}
                       placeholder="IBAN"
@@ -225,3 +225,4 @@ export default function AdminSettings({ refreshKey = 0 }) {
     </div>
   )
 }
+

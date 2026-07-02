@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { X, Plus, Trash2 } from 'lucide-react'
+import { SmoothInput } from '../SmoothInput'
 import { createClass, updateClass } from '../../lib/adminApi'
 
 const defaultPaymentMethods = [
@@ -221,7 +222,7 @@ export default function AdminClassEditor({ classData, mode, onClose, onSaved }) 
           <div className="flex flex-col gap-5">
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-medium text-[#1A1A2E]">Title</label>
-              <input value={form.title} onChange={(e) => updateField('title', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+              <SmoothInput value={form.title} onChange={(e) => updateField('title', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
             </div>
 
             <div className="flex flex-col gap-1.5">
@@ -232,11 +233,11 @@ export default function AdminClassEditor({ classData, mode, onClose, onSaved }) 
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-[#1A1A2E]">Price (PKR)</label>
-                <input type="number" value={form.price} onChange={(e) => updateField('price', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+                <SmoothInput type="number" value={form.price} onChange={(e) => updateField('price', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-[#1A1A2E]">Discount Price</label>
-                <input type="number" value={form.discount_price} onChange={(e) => updateField('discount_price', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+                <SmoothInput type="number" value={form.discount_price} onChange={(e) => updateField('discount_price', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
                 <p className="text-[11px] text-[#6B7280]">Leave empty for no discount.</p>
               </div>
             </div>
@@ -244,28 +245,28 @@ export default function AdminClassEditor({ classData, mode, onClose, onSaved }) 
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-[#1A1A2E]">Modules</label>
-                <input type="number" value={form.modules} onChange={(e) => updateField('modules', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+                <SmoothInput type="number" value={form.modules} onChange={(e) => updateField('modules', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-[#1A1A2E]">Duration</label>
-                <input value={form.duration} onChange={(e) => updateField('duration', e.target.value)} placeholder="e.g. 8 Weeks or 6 hours" className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+                <SmoothInput value={form.duration} onChange={(e) => updateField('duration', e.target.value)} placeholder="e.g. 8 Weeks or 6 hours" className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-[#1A1A2E]">Teacher</label>
-                <input value={form.teacher} onChange={(e) => updateField('teacher', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+                <SmoothInput value={form.teacher} onChange={(e) => updateField('teacher', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-[#1A1A2E]">Language</label>
-                <input value={form.language} onChange={(e) => updateField('language', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+                <SmoothInput value={form.language} onChange={(e) => updateField('language', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
               </div>
             </div>
 
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-medium text-[#1A1A2E]">Thumbnail URL</label>
-              <input value={form.thumbnail_url} onChange={(e) => updateField('thumbnail_url', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+              <SmoothInput value={form.thumbnail_url} onChange={(e) => updateField('thumbnail_url', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
             </div>
 
             {/* Thumbnail preview */}
@@ -281,7 +282,7 @@ export default function AdminClassEditor({ classData, mode, onClose, onSaved }) 
               <label className="text-sm font-medium text-[#1A1A2E]">
                 SEO Title <span className="text-[#6B7280] font-normal text-xs">(shown in Google results)</span>
               </label>
-              <input value={form.meta_title} onChange={e => updateField('meta_title', e.target.value)}
+              <SmoothInput value={form.meta_title} onChange={e => updateField('meta_title', e.target.value)}
                 placeholder="Pregnancy Week by Week Class — Dr. Zainab Mohsin"
                 className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
             </div>
@@ -310,7 +311,7 @@ export default function AdminClassEditor({ classData, mode, onClose, onSaved }) 
               <label className="text-sm font-medium text-[#1A1A2E]">What You'll Learn</label>
               {(form.what_you_learn || []).map((item, i) => (
                 <div key={i} className="flex gap-2">
-                  <input value={item}
+                  <SmoothInput value={item}
                     onChange={e => {
                       const updated = [...form.what_you_learn]
                       updated[i] = e.target.value
@@ -333,13 +334,13 @@ export default function AdminClassEditor({ classData, mode, onClose, onSaved }) 
               <label className="text-sm font-medium text-[#1A1A2E]">Curriculum (module list)</label>
               {(form.curriculum || []).map((item, i) => (
                 <div key={i} className="flex gap-2">
-                  <input value={item.week} onChange={e => {
+                  <SmoothInput value={item.week} onChange={e => {
                     const u=[...form.curriculum]; u[i].week=e.target.value; updateField('curriculum', u)
                   }} placeholder="Week 1" className="w-20 rounded-xl border border-gray-200 px-3 py-2 text-xs focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
-                  <input value={item.title} onChange={e => {
+                  <SmoothInput value={item.title} onChange={e => {
                     const u=[...form.curriculum]; u[i].title=e.target.value; updateField('curriculum', u)
                   }} placeholder="Module title" className="flex-1 rounded-xl border border-gray-200 px-3 py-2 text-xs focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
-                  <input value={item.duration} onChange={e => {
+                  <SmoothInput value={item.duration} onChange={e => {
                     const u=[...form.curriculum]; u[i].duration=e.target.value; updateField('curriculum', u)
                   }} placeholder="30 min" className="w-20 rounded-xl border border-gray-200 px-3 py-2 text-xs focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
                   <button type="button" onClick={() => updateField('curriculum', form.curriculum.filter((_,j)=>j!==i))}
@@ -357,10 +358,10 @@ export default function AdminClassEditor({ classData, mode, onClose, onSaved }) 
               <label className="text-sm font-medium text-[#1A1A2E]">FAQs</label>
               {(form.faqs || []).map((item, i) => (
                 <div key={i} className="rounded-xl border border-gray-100 p-3">
-                  <input value={item.q} onChange={e => {
+                  <SmoothInput value={item.q} onChange={e => {
                     const u=[...form.faqs]; u[i].q=e.target.value; updateField('faqs', u)
                   }} placeholder="Question" className="mb-2 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
-                  <input value={item.a} onChange={e => {
+                  <SmoothInput value={item.a} onChange={e => {
                     const u=[...form.faqs]; u[i].a=e.target.value; updateField('faqs', u)
                   }} placeholder="Answer" className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
                   <button type="button" onClick={() => updateField('faqs', form.faqs.filter((_,j)=>j!==i))}
@@ -382,18 +383,18 @@ export default function AdminClassEditor({ classData, mode, onClose, onSaved }) 
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-[#1A1A2E]">Total seats</label>
-                <input type="number" value={form.seats_total} onChange={(e) => updateField('seats_total', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+                <SmoothInput type="number" value={form.seats_total} onChange={(e) => updateField('seats_total', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-[#1A1A2E]">Start Date</label>
-                <input type="date" value={form.start_date} onChange={(e) => updateField('start_date', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+                <SmoothInput type="date" value={form.start_date} onChange={(e) => updateField('start_date', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-[#1A1A2E]">End Date</label>
-                <input type="date" value={form.end_date} onChange={(e) => updateField('end_date', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+                <SmoothInput type="date" value={form.end_date} onChange={(e) => updateField('end_date', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
               </div>
             </div>
 
@@ -415,7 +416,7 @@ export default function AdminClassEditor({ classData, mode, onClose, onSaved }) 
                         <option key={day} value={day}>{day}</option>
                       ))}
                     </select>
-                    <input value={slot.time || ''} onChange={(e) => updateSlot(index, 'time', e.target.value)} placeholder="6:00 PM" className="w-28 rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+                    <SmoothInput value={slot.time || ''} onChange={(e) => updateSlot(index, 'time', e.target.value)} placeholder="6:00 PM" className="w-28 rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
                     <button type="button" onClick={() => removeSlot(index)} className="rounded-xl border border-red-200 p-2 text-red-500 transition hover:bg-red-50">
                       <Trash2 size={15} />
                     </button>
@@ -429,7 +430,7 @@ export default function AdminClassEditor({ classData, mode, onClose, onSaved }) 
 
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-medium text-[#1A1A2E]">Cal.com booking link (optional)</label>
-              <input value={form.cal_link} onChange={(e) => updateField('cal_link', e.target.value)} placeholder="drzainab/pregnancy-week-by-week" className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+              <SmoothInput value={form.cal_link} onChange={(e) => updateField('cal_link', e.target.value)} placeholder="drzainab/pregnancy-week-by-week" className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
               <p className="text-[11px] text-[#6B7280]">If set, this overrides the manual schedule above with live availability.</p>
             </div>
 
@@ -447,19 +448,19 @@ export default function AdminClassEditor({ classData, mode, onClose, onSaved }) 
                     <div className="grid gap-3 sm:grid-cols-2">
                       <div className="flex flex-col gap-1.5">
                         <label className="text-sm font-medium text-[#1A1A2E]">Method</label>
-                        <input value={method.method} onChange={(e) => updatePaymentMethod(index, 'method', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+                        <SmoothInput value={method.method} onChange={(e) => updatePaymentMethod(index, 'method', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
                       </div>
                       <div className="flex flex-col gap-1.5">
                         <label className="text-sm font-medium text-[#1A1A2E]">Account/ID</label>
-                        <input value={method.value} onChange={(e) => updatePaymentMethod(index, 'value', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+                        <SmoothInput value={method.value} onChange={(e) => updatePaymentMethod(index, 'value', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
                       </div>
                       <div className="flex flex-col gap-1.5">
                         <label className="text-sm font-medium text-[#1A1A2E]">Details</label>
-                        <input value={method.details} onChange={(e) => updatePaymentMethod(index, 'details', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+                        <SmoothInput value={method.details} onChange={(e) => updatePaymentMethod(index, 'details', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
                       </div>
                       <div className="flex flex-col gap-1.5">
                         <label className="text-sm font-medium text-[#1A1A2E]">Subtitle</label>
-                        <input value={method.subtitle} onChange={(e) => updatePaymentMethod(index, 'subtitle', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+                        <SmoothInput value={method.subtitle} onChange={(e) => updatePaymentMethod(index, 'subtitle', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
                       </div>
                     </div>
                     <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -497,3 +498,4 @@ export default function AdminClassEditor({ classData, mode, onClose, onSaved }) 
     </div>
   )
 }
+

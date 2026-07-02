@@ -4,6 +4,7 @@ import { Search, HelpCircle, ArrowRight } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { posthog } from '../lib/posthog'
 import FAQAccordion from '../components/FAQAccordion'
+import { SmoothInput } from '../components/SmoothInput'
 import SEO from '../components/SEO'
 
 const CATEGORIES = ['All', 'Appointments', 'Pregnancy', 'Baby Care', 'Postnatal', 'General']
@@ -101,7 +102,7 @@ export default function FAQs() {
           {/* Search bar */}
           <div className="relative mt-7 max-w-md mx-auto">
             <Search size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6B7280]" />
-            <input
+            <SmoothInput
               id="faq-search"
               type="text"
               value={searchQuery}

@@ -3,6 +3,7 @@ import {
   LayoutDashboard, BookOpen, Lock, RefreshCw, LogOut, Eye, EyeOff,
   Leaf,
 } from 'lucide-react'
+import { SmoothInput } from '../components/SmoothInput'
 import { supabase } from '../lib/supabase'
 import AdminOverview from '../components/admin/AdminOverview'
 import AdminClasses from '../components/admin/AdminClasses'
@@ -40,7 +41,7 @@ function LoginScreen({ onSuccess }) {
 
         <form onSubmit={handleLogin} className="flex flex-col gap-4">
           <div className="relative">
-            <input
+            <SmoothInput
               id="admin-pw"
               type={showPw ? 'text' : 'password'}
               value={pwInput}

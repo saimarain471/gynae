@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { supabase } from '../lib/supabase'
+import { SmoothInput } from '../components/SmoothInput'
 import {
   Lock, LogOut, PenSquare, Eye, EyeOff, Trash2,
   ToggleLeft, ToggleRight, CheckCircle, XCircle,
@@ -71,7 +72,7 @@ function LoginCard({ onSuccess }) {
         </div>
         <form onSubmit={handleLogin} className="flex flex-col gap-4">
           <div className="relative">
-            <input
+            <SmoothInput
               id="admin-password"
               type={showPw ? 'text' : 'password'}
               value={pw}
@@ -172,14 +173,14 @@ function BlogTab({ showToast }) {
             {/* Title */}
             <div>
               <label className="block text-xs font-semibold text-[#1A1A2E] mb-1.5">Title <span className="text-red-400">*</span></label>
-              <input id="post-title" name="title" type="text" value={form.title} onChange={handleChange}
+              <SmoothInput id="post-title" name="title" type="text" value={form.title} onChange={handleChange}
                 placeholder="e.g. What to Expect in Your First Trimester"
                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-[#1A1A2E] outline-none focus:border-[#52B788] transition-colors" />
             </div>
             {/* Slug */}
             <div>
               <label className="block text-xs font-semibold text-[#1A1A2E] mb-1.5">Slug <span className="text-red-400">*</span></label>
-              <input id="post-slug" name="slug" type="text" value={form.slug}
+              <SmoothInput id="post-slug" name="slug" type="text" value={form.slug}
                 onChange={(e) => { setSlugManuallyEdited(true); handleChange(e) }}
                 placeholder="auto-generated-from-title"
                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-[#1A1A2E] outline-none focus:border-[#52B788] transition-colors font-mono" />
@@ -209,13 +210,13 @@ function BlogTab({ showToast }) {
             {/* Read time */}
             <div>
               <label className="block text-xs font-semibold text-[#1A1A2E] mb-1.5">Read time (minutes)</label>
-              <input id="post-read-time" name="readTime" type="number" min={1} max={60} value={form.readTime} onChange={handleChange}
+              <SmoothInput id="post-read-time" name="readTime" type="number" min={1} max={60} value={form.readTime} onChange={handleChange}
                 className="w-28 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-[#1A1A2E] outline-none focus:border-[#52B788] transition-colors" />
             </div>
             {/* Cover URL */}
             <div>
               <label className="block text-xs font-semibold text-[#1A1A2E] mb-1.5">Cover Image URL <span className="text-[#6B7280] font-normal">(optional)</span></label>
-              <input id="post-cover-url" name="coverImageUrl" type="url" value={form.coverImageUrl} onChange={handleChange}
+              <SmoothInput id="post-cover-url" name="coverImageUrl" type="url" value={form.coverImageUrl} onChange={handleChange}
                 placeholder="https://…"
                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-[#1A1A2E] outline-none focus:border-[#52B788] transition-colors" />
             </div>
@@ -371,7 +372,7 @@ function FAQsTab({ showToast }) {
         <div className="flex flex-col gap-4 max-w-2xl">
           <div>
             <label className="block text-xs font-semibold text-[#1A1A2E] mb-1.5">Question <span className="text-red-400">*</span></label>
-            <input name="question" type="text" value={form.question} onChange={handleChange}
+            <SmoothInput name="question" type="text" value={form.question} onChange={handleChange}
               placeholder="e.g. How do I book a consultation?"
               className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-[#1A1A2E] outline-none focus:border-[#52B788] transition-colors" />
           </div>
@@ -394,7 +395,7 @@ function FAQsTab({ showToast }) {
             </div>
             <div>
               <label className="block text-xs font-semibold text-[#1A1A2E] mb-1.5">Sort Order <span className="text-[#6B7280] font-normal">(lower = first)</span></label>
-              <input name="sortOrder" type="number" min={0} value={form.sortOrder} onChange={handleChange}
+              <SmoothInput name="sortOrder" type="number" min={0} value={form.sortOrder} onChange={handleChange}
                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-[#1A1A2E] outline-none focus:border-[#52B788] transition-colors" />
             </div>
           </div>
@@ -651,3 +652,4 @@ export default function BlogAdmin() {
     </div>
   )
 }
+

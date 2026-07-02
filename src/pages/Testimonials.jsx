@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { posthog } from '../lib/posthog'
 import TestimonialCard from '../components/TestimonialCard'
 import StarRating from '../components/StarRating'
+import { SmoothInput } from '../components/SmoothInput'
 import { Star, CheckCircle, MessageSquarePlus } from 'lucide-react'
 import SEO from '../components/SEO'
 
@@ -257,7 +258,7 @@ export default function Testimonials() {
                   <label className="block text-xs font-semibold text-[#1A1A2E] mb-1.5">
                     Your Name <span className="text-red-400">*</span>
                   </label>
-                  <input
+                  <SmoothInput
                     type="text"
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
@@ -269,7 +270,7 @@ export default function Testimonials() {
                   <label className="block text-xs font-semibold text-[#1A1A2E] mb-1.5">
                     City <span className="text-red-400">*</span>
                   </label>
-                  <input
+                  <SmoothInput
                     type="text"
                     value={formCity}
                     onChange={(e) => setFormCity(e.target.value)}

@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabase'
 import { posthog } from '../lib/posthog'
 import { buildWhatsAppUrl } from '../lib/whatsapp'
 import CalcomEmbed from '../components/CalcomEmbed'
+import { SmoothInput } from '../components/SmoothInput'
 import { useSiteSettings } from '../hooks/useSiteSettings'
 import SEO from '../components/SEO'
 import {
@@ -583,7 +584,7 @@ export default function Booking() {
                         <label className="text-sm font-medium text-[#1A1A2E]">
                           Full Name <span className="text-red-400">*</span>
                         </label>
-                        <input
+                        <SmoothInput
                           {...register('fullName')}
                           placeholder="Ayesha Fatima"
                           className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm placeholder:text-gray-300 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]"
@@ -596,7 +597,7 @@ export default function Booking() {
                         <label className="text-sm font-medium text-[#1A1A2E]">
                           Email Address <span className="text-red-400">*</span>
                         </label>
-                        <input
+                        <SmoothInput
                           {...register('email')}
                           type="email"
                           placeholder="ayesha@gmail.com"
@@ -610,7 +611,7 @@ export default function Booking() {
                         <label className="text-sm font-medium text-[#1A1A2E]">
                           Phone Number <span className="text-red-400">*</span>
                         </label>
-                        <input
+                        <SmoothInput
                           {...register('phone')}
                           placeholder="03XX-XXXXXXX"
                           className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm placeholder:text-gray-300 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]"
@@ -624,7 +625,7 @@ export default function Booking() {
                         <label className="text-sm font-medium text-[#1A1A2E]">
                           WhatsApp Number <span className="text-red-400">*</span>
                         </label>
-                        <input
+                        <SmoothInput
                           {...register('whatsappNumber')}
                           placeholder="03XX-XXXXXXX"
                           className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm placeholder:text-gray-300 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]"
@@ -638,7 +639,7 @@ export default function Booking() {
                         <label className="text-sm font-medium text-[#1A1A2E]">
                           City <span className="text-red-400">*</span>
                         </label>
-                        <input
+                        <SmoothInput
                           {...register('city')}
                           placeholder="Rawalpindi"
                           className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm placeholder:text-gray-300 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]"
@@ -674,7 +675,7 @@ export default function Booking() {
                         <label className="text-sm font-medium text-[#1A1A2E]">
                           Preferred Date <span className="text-red-400">*</span>
                         </label>
-                        <input
+                        <SmoothInput
                           {...register('preferredDate')}
                           type="date"
                           min={minDate}
@@ -745,7 +746,7 @@ export default function Booking() {
                         <label className="text-sm font-medium text-[#1A1A2E]">
                           Transaction ID / Reference Number <span className="text-red-400">*</span>
                         </label>
-                        <input
+                        <SmoothInput
                           {...register('transactionId')}
                           placeholder="e.g. TXN8823991"
                           className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm placeholder:text-gray-300 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]"

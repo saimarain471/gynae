@@ -9,6 +9,7 @@ import { posthog } from '../lib/posthog'
 import { buildWhatsAppUrl } from '../lib/whatsapp'
 import PaymentInstructions from '../components/PaymentInstructions'
 import CalcomEmbed from '../components/CalcomEmbed'
+import { SmoothInput } from '../components/SmoothInput'
 import SEO from '../components/SEO'
 
 const stepOneSchema = z.object({
@@ -310,12 +311,12 @@ export default function BookClass() {
                   <div className="grid gap-6 sm:grid-cols-2">
                     <div className="flex flex-col gap-1">
                       <label className="text-sm font-medium text-[#1A1A2E]">Full Name</label>
-                      <input {...register('fullName')} className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-[#1A1A2E] placeholder:text-gray-300 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+                      <SmoothInput {...register('fullName')} className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-[#1A1A2E] placeholder:text-gray-300 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
                       {errors.fullName && <p className="text-xs text-red-500">{errors.fullName.message}</p>}
                     </div>
                     <div className="flex flex-col gap-1">
                       <label className="text-sm font-medium text-[#1A1A2E]">Email Address</label>
-                      <input {...register('email')} type="email" className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-[#1A1A2E] placeholder:text-gray-300 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+                      <SmoothInput {...register('email')} type="email" className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-[#1A1A2E] placeholder:text-gray-300 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
                       {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
                     </div>
                   </div>
@@ -323,12 +324,12 @@ export default function BookClass() {
                   <div className="grid gap-6 sm:grid-cols-2">
                     <div className="flex flex-col gap-1">
                       <label className="text-sm font-medium text-[#1A1A2E]">Phone Number</label>
-                      <input {...register('phone')} className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-[#1A1A2E] placeholder:text-gray-300 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" placeholder="03XX-XXXXXXX" />
+                      <SmoothInput {...register('phone')} className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-[#1A1A2E] placeholder:text-gray-300 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" placeholder="03XX-XXXXXXX" />
                       {errors.phone && <p className="text-xs text-red-500">{errors.phone.message}</p>}
                     </div>
                     <div className="flex flex-col gap-1">
                       <label className="text-sm font-medium text-[#1A1A2E]">WhatsApp Number</label>
-                      <input {...register('whatsappNumber')} className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-[#1A1A2E] placeholder:text-gray-300 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" placeholder="03XX-XXXXXXX" />
+                      <SmoothInput {...register('whatsappNumber')} className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-[#1A1A2E] placeholder:text-gray-300 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" placeholder="03XX-XXXXXXX" />
                       <p className="text-xs italic text-[#6B7280]">Class access link will be sent to this number</p>
                       {errors.whatsappNumber && <p className="text-xs text-red-500">{errors.whatsappNumber.message}</p>}
                     </div>
@@ -336,7 +337,7 @@ export default function BookClass() {
 
                   <div className="flex flex-col gap-1">
                     <label className="text-sm font-medium text-[#1A1A2E]">City</label>
-                    <input {...register('city')} className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-[#1A1A2E] placeholder:text-gray-300 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+                    <SmoothInput {...register('city')} className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-[#1A1A2E] placeholder:text-gray-300 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
                     {errors.city && <p className="text-xs text-red-500">{errors.city.message}</p>}
                   </div>
 
@@ -385,7 +386,7 @@ export default function BookClass() {
 
                   <div className="flex flex-col gap-1">
                     <label className="text-sm font-medium text-[#1A1A2E]">Transaction ID / TID</label>
-                    <input {...register('transactionId')} className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-[#1A1A2E] placeholder:text-gray-300 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" placeholder="Enter the transaction ID from your payment receipt" />
+                    <SmoothInput {...register('transactionId')} className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-[#1A1A2E] placeholder:text-gray-300 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" placeholder="Enter the transaction ID from your payment receipt" />
                     <p className="text-xs italic text-[#6B7280]">Enter the TID/reference number from your JazzCash/EasyPaisa receipt</p>
                     {errors.transactionId && <p className="text-xs text-red-500">{errors.transactionId.message}</p>}
                   </div>
