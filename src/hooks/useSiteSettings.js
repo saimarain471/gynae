@@ -28,6 +28,7 @@ const defaultPaymentMethods = [
 const defaultSettings = {
   consultation_fee: 2000,
   payment_methods: defaultPaymentMethods,
+  about_bio_text: "Dr. Zainub Mohsin is a consultant gynecologist and women's health educator helping mothers prepare for pregnancy, birth, and newborn care with clarity and confidence.",
 }
 
 export function getActivePaymentMethods(settings = defaultSettings) {
@@ -74,6 +75,7 @@ export function useSiteSettings() {
         const newSettings = {
           consultation_fee: data.consultation_fee ?? defaultSettings.consultation_fee,
           payment_methods: Array.isArray(data.payment_methods) ? data.payment_methods : defaultSettings.payment_methods,
+          about_bio_text: data.about_bio_text ?? defaultSettings.about_bio_text,
         }
         cachedSettings = newSettings
         setSettings(newSettings)

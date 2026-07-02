@@ -1,13 +1,24 @@
-# Dr. Zainab Mohsin - Online Gynecology Consultations
+# Dr. Zainab Mohsin - Consultant Gynecologist
 
-> Expert guidance on pregnancy, safe delivery, and newborn care — from the comfort of home.
+> MBBS, FCPS (Gynecology & Obstetrics), 10+ years experience in maternal
+> health, pregnancy care, and baby care education. Online consultations
+> and classes for women across Pakistan and worldwide.
 
-Dr. Zainab Mohsin is a verified Consultant Gynecologist with MBBS and FCPS qualifications and over 10 years of clinical experience. She has helped over 500+ mothers across Pakistan.
+## Classes
 
-## Services
-- Online Video Consultations (30 mins via Google Meet)
-- Dedicated Masterclasses on Pregnancy and Baby Care
+- [Pregnancy Week by Week](https://gynae.vercel.app/classes/pregnancy-week-by-week): Trimester-by-trimester guide, symptoms, do's and don'ts, when to call your doctor
+- [Safe Delivery Preparation](https://gynae.vercel.app/classes/safe-delivery-preparation): Normal vs C-section prep, pain management, hospital bag checklist
+- [Newborn Baby Care 101](https://gynae.vercel.app/classes/newborn-baby-care): Bathing, feeding, cord care, diaper changes, sleep schedules
+- [Breastfeeding Masterclass](https://gynae.vercel.app/classes/breastfeeding-masterclass): Latch technique, milk supply, pumping, common problems
+- [Postpartum Recovery Guide](https://gynae.vercel.app/classes/postpartum-recovery): Physical healing, mental health, postpartum depression signs, nutrition
+- [Baby Growth & Milestones](https://gynae.vercel.app/classes/baby-growth-milestones): 0-12 month development, vaccination schedule, warning signs
 
-## Contact & Booking
-- Book consultations directly at: https://gynae.vercel.app/booking
-- WhatsApp support is available post-consultation.
+## Consultation
+
+- [Book Private Consultation](https://gynae.vercel.app/booking): 1-on-1 private video consultation with Dr. Zainab, PKR 5,000
+
+## About
+
+- [About Dr. Zainab](https://gynae.vercel.app/about): Credentials, experience, philosophy of care
+- [Homepage](https://gynae.vercel.app/): Overview of services, classes, and consultation booking
+- [FAQ](https://gynae.vercel.app/faq): Common questions about classes, consultations, and booking

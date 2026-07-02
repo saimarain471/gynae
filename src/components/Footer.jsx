@@ -1,5 +1,26 @@
 import { Link } from 'react-router-dom'
 import { Mail, PhoneCall, MapPin } from 'lucide-react'
+import { useSiteSettings } from '../hooks/useSiteSettings'
+
+function FooterBio() {
+  const { settings, loading } = useSiteSettings()
+
+  return (
+    <div className="min-h-[72px]">
+      {loading ? (
+        <div className="space-y-2 animate-pulse">
+          <div className="h-4 bg-slate-200 rounded w-full"></div>
+          <div className="h-4 bg-slate-200 rounded w-5/6"></div>
+          <div className="h-4 bg-slate-200 rounded w-2/3"></div>
+        </div>
+      ) : (
+        <p className="max-w-sm text-sm leading-6 text-text-muted">
+          {settings.about_bio_text}
+        </p>
+      )}
+    </div>
+  )
+}
 
 export default function Footer() {
   return (
@@ -7,9 +28,7 @@ export default function Footer() {
       <div className="mx-auto grid max-w-7xl gap-10 px-6 md:grid-cols-3 lg:px-8">
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-text">About</h3>
-          <p className="max-w-sm text-sm leading-6 text-text-muted">
-            Dr. Zainub Mohsin is a consultant gynecologist and women&apos;s health educator helping mothers prepare for pregnancy, birth, and newborn care with clarity and confidence.
-          </p>
+          <FooterBio />
           <div className="flex flex-wrap gap-3 text-sm text-primary">
             <span className="rounded-full bg-secondary/10 px-3 py-1">JazzCash</span>
             <span className="rounded-full bg-secondary/10 px-3 py-1">EasyPaisa</span>
