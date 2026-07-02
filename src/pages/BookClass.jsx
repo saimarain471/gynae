@@ -33,21 +33,30 @@ export default function BookClass() {
   const [submitted, setSubmitted] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const [whatsappUrl, setWhatsappUrl] = useState('')
-  const [step, setStep] = useState(1)
   const [formReady, setFormReady] = useState(false)
   const [calBookingUid, setCalBookingUid] = useState('')
+  const [step, setStep] = useState(1)
 
   const {
     register,
     handleSubmit,
     getValues,
+    control,
     setError,
     clearErrors,
-    control,
     formState: { errors, isSubmitting },
   } = useForm({
     mode: 'onChange',
-    defaultValues: { paymentMethod: '' },
+    defaultValues: {
+      fullName: '',
+      email: '',
+      phone: '',
+      whatsappNumber: '',
+      city: '',
+      paymentMethod: '',
+      transactionId: '',
+      additionalNotes: '',
+    },
   })
 
   const paymentMethod = useWatch({ control, name: 'paymentMethod' })

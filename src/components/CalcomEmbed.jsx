@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react'
-import Cal, { getCalApi } from '@calcom/embed-react'
-import { Loader2, AlertCircle, CalendarX } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Loader2, CalendarX } from 'lucide-react'
 
 export default function CalcomEmbed({
   calLink,
@@ -9,88 +8,122 @@ export default function CalcomEmbed({
   duration = 30,
   label = 'Select a time slot',
 }) {
-  const [loaded, setLoaded] = useState(false)
-  const [hasError, setHasError] = useState(false)
+  const [status, setStatus] = useState('loading')
+  const containerRef = useRef(null)
 
   useEffect(() => {
     if (!calLink) {
-      setHasError(true)
+      setStatus('error')
       return
     }
 
-    let isMounted = true
+    const existingScript = document.getElementById(`cal-script-${namespace}`)
+    if (existingScript) existingScript.remove()
 
-    ;(async function initCal() {
+    if (window.Cal) {
       try {
-        const cal = await getCalApi({ namespace })
+        window.Cal('destroy', { namespace })
+      } catch (e) {
+        // ignore destroy errors
+      }
+    }
 
-        cal('ui', {
-          theme: 'light',
-          styles: {
-            branding: { brandColor: '#2D6A4F' },
+    const script = document.createElement('script')
+    script.id = `cal-script-${namespace}`
+    script.async = true
+    script.src = 'https://app.cal.com/embed/embed.js'
+
+    script.onload = () => {
+      try {
+        window.Cal('init', namespace, {
+          origin: 'https://app.cal.com',
+        })
+
+        window.Cal.ns[namespace]('inline', {
+          elementOrSelector: `#cal-embed-${namespace}`,
+          config: {
+            layout: 'month_view',
+            theme: 'light',
           },
+          calLink,
+        })
+
+        window.Cal.ns[namespace]('ui', {
+          theme: 'light',
+          styles: { branding: { brandColor: '#2D6A4F' } },
           hideEventTypeDetails: false,
           layout: 'month_view',
         })
 
-        cal('on', {
+        window.Cal.ns[namespace]('on', {
           action: 'bookingSuccessful',
           callback: (event) => {
             if (onBookingSuccess) {
-              onBookingSuccess(event.detail.data)
+              onBookingSuccess(event.detail?.data || {})
             }
           },
         })
 
-        if (isMounted) setLoaded(true)
+        setStatus('ready')
       } catch (err) {
-        console.error('Cal.com embed failed to load:', err)
-        if (isMounted) setHasError(true)
+        console.error('Cal.com init error:', err)
+        setStatus('error')
       }
-    })()
+    }
+
+    script.onerror = () => {
+      console.error('Cal.com script failed to load')
+      setStatus('error')
+    }
+
+    document.body.appendChild(script)
 
     return () => {
-      isMounted = false
+      const s = document.getElementById(`cal-script-${namespace}`)
+      if (s) s.remove()
+      if (window.Cal?.ns?.[namespace]) {
+        try {
+          window.Cal('destroy', { namespace })
+        } catch (e) {
+          // ignore destroy errors
+        }
+      }
     }
   }, [calLink, namespace, onBookingSuccess])
 
-  if (hasError || !calLink) {
+  if (status === 'error' || !calLink) {
     return (
-      <div className="rounded-2xl border border-[#F4A261]/30 bg-[#FFF8F0] p-6 text-center">
-        <CalendarX size={28} className="mx-auto mb-2 text-[#F4A261]" />
-        <p className="text-sm font-medium text-[#1A1A2E]">Calendar temporarily unavailable</p>
-        <p className="mt-1 text-xs text-[#6B7280]">
-          Please use the form below and Dr. Zainab will confirm your preferred time via WhatsApp.
+      <div className="bg-[#FFF8F0] border border-[#F4A261]/30 rounded-2xl p-6 text-center">
+        <CalendarX size={28} className="text-[#F4A261] mx-auto mb-2" />
+        <p className="text-sm font-medium text-[#1A1A2E]">Live calendar is not configured yet</p>
+        <p className="text-xs text-[#6B7280] mt-1 max-w-xs mx-auto">
+          Please select your preferred date and time in the form below.
+          Dr. Zainab will confirm your slot on WhatsApp.
         </p>
       </div>
     )
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white">
-      <div className="flex items-center justify-between border-b border-gray-100 bg-[#FAFAF8] px-5 py-3">
+    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+      <div className="px-5 py-3 border-b border-gray-100 bg-[#FAFAF8] flex items-center justify-between">
         <span className="text-sm font-medium text-[#1A1A2E]">{label}</span>
         <span className="text-xs text-[#6B7280]">{duration} min session</span>
       </div>
 
-      {!loaded && (
-        <div className="flex flex-col items-center justify-center gap-2 py-16">
-          <Loader2 size={24} className="animate-spin text-[#52B788]" />
+      {status === 'loading' && (
+        <div className="flex flex-col items-center justify-center py-16 gap-2">
+          <Loader2 size={24} className="text-[#52B788] animate-spin" />
           <p className="text-xs text-[#6B7280]">Loading available times...</p>
         </div>
       )}
 
-      <div className={loaded ? 'block' : 'hidden'}>
-        <Cal
-          namespace={namespace}
-          calLink={calLink}
-          style={{ width: '100%', height: '100%', minHeight: '500px', overflow: 'auto' }}
-          config={{
-            theme: 'light',
-            layout: 'month_view',
-          }}
-        />
-      </div>
+      <div
+        id={`cal-embed-${namespace}`}
+        ref={containerRef}
+        className={status === 'ready' ? 'block' : 'hidden'}
+        style={{ minHeight: '500px', width: '100%' }}
+      />
     </div>
   )
 }

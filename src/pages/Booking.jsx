@@ -8,7 +8,7 @@ import { posthog } from '../lib/posthog'
 import { buildWhatsAppUrl } from '../lib/whatsapp'
 import CalcomEmbed from '../components/CalcomEmbed'
 import { SmoothInput } from '../components/SmoothInput'
-import { useSiteSettings } from '../hooks/useSiteSettings'
+import { useSiteSettings, normalizeCalLink } from '../hooks/useSiteSettings'
 import SEO from '../components/SEO'
 import {
   Video, Clock, MessageCircle, FileText, Heart,
@@ -30,6 +30,13 @@ const stepTwoSchema = z.object({
   preferredDate: z.string().min(1, 'Please select a preferred date.'),
   preferredTimeSlot: z.string().min(1, 'Please select a time slot.'),
   concern: z.string().min(20, 'Please describe your concern in at least 20 characters.'),
+  paymentMethod: z.string().min(1, 'Please select a payment method.'),
+  transactionId: z.string().min(3, 'Please enter your transaction ID.'),
+  additionalNotes: z.string().optional(),
+})
+
+const calendarSchema = z.object({
+  whatsappNumber: z.string().min(10, 'Please enter your WhatsApp number.'),
   paymentMethod: z.string().min(1, 'Please select a payment method.'),
   transactionId: z.string().min(3, 'Please enter your transaction ID.'),
   additionalNotes: z.string().optional(),
@@ -72,9 +79,10 @@ export default function Booking() {
 
   const paymentMethod = useWatch({ control, name: 'paymentMethod' })
   const minDate = new Date().toISOString().split('T')[0]
-  const consultationCalLink = import.meta.env.VITE_CALCOM_CONSULTATION_LINK?.trim() || ''
-  const consultationCalNamespace = import.meta.env.VITE_CALCOM_NAMESPACE?.trim() || 'dr-zainab'
   const { settings } = useSiteSettings()
+  const consultationCalLink = normalizeCalLink(settings?.consultation_cal_link || import.meta.env.VITE_CALCOM_CONSULTATION_LINK?.trim()) || ''
+  const isCalBookingEnabled = Boolean(consultationCalLink)
+  const consultationCalNamespace = import.meta.env.VITE_CALCOM_NAMESPACE?.trim() || 'dr-zainab'
   const consultationFee = settings?.consultation_fee ?? 2000
   const paymentOptions = useMemo(() => (settings?.payment_methods || []).filter((option) => option.active), [settings])
 
@@ -121,17 +129,21 @@ export default function Booking() {
   }
 
   const buildWhatsappLink = (data) => {
-    const message = `Assalam o Alaikum Dr. Zainab! I have booked a consultation and sent payment via ${data.paymentMethod}. My Transaction ID is ${data.transactionId}. Preferred: ${data.preferredDate} (${data.preferredTimeSlot}). My name is ${data.fullName}.`
-    return buildWhatsAppUrl(message)
+    const baseMessage = `Assalam o Alaikum Dr. Zainab! I have booked a consultation and sent payment via ${data.paymentMethod}. My Transaction ID is ${data.transactionId}.`
+    const slotText = isCalBookingEnabled
+      ? ' I booked my slot through Cal.com.'
+      : ` Preferred: ${data.preferredDate} (${data.preferredTimeSlot}).`
+    const nameText = isCalBookingEnabled ? '' : ` My name is ${data.fullName}.`
+    return buildWhatsAppUrl(`${baseMessage}${slotText}${nameText}`)
   }
 
   const onSubmit = async (values) => {
     setSubmitError('')
     setStatus('submitting')
 
-    const result = stepTwoSchema.safeParse(values)
-    if (!result.success) {
-      const fieldErrors = result.error.flatten().fieldErrors
+    const validation = isCalBookingEnabled ? calendarSchema.safeParse(values) : stepTwoSchema.safeParse(values)
+    if (!validation.success) {
+      const fieldErrors = validation.error.flatten().fieldErrors
       Object.entries(fieldErrors).forEach(([field, messages]) => {
         setError(field, { type: 'validation', message: messages?.[0] ?? 'Invalid value' })
       })
@@ -140,14 +152,14 @@ export default function Booking() {
     }
 
     const payload = {
-      full_name: values.fullName,
-      email: values.email,
-      phone: values.phone,
+      full_name: isCalBookingEnabled ? null : values.fullName,
+      email: isCalBookingEnabled ? null : values.email,
+      phone: isCalBookingEnabled ? null : values.phone,
       whatsapp_number: values.whatsappNumber,
-      city: values.city,
-      preferred_date: values.preferredDate,
-      preferred_time: values.preferredTimeSlot,
-      concern: values.concern,
+      city: isCalBookingEnabled ? null : values.city,
+      preferred_date: isCalBookingEnabled ? null : values.preferredDate,
+      preferred_time: isCalBookingEnabled ? null : values.preferredTimeSlot,
+      concern: isCalBookingEnabled ? null : values.concern,
       payment_method: values.paymentMethod,
       transaction_id: values.transactionId,
       additional_notes: values.additionalNotes || '',
@@ -535,6 +547,85 @@ export default function Booking() {
                     Browse Classes
                   </Link>
                 </div>
+              ) : isCalBookingEnabled ? (
+                <form onSubmit={handleSubmit(onSubmit)} className="mt-8 grid gap-6">
+                  <div className="mb-6">
+                    <h2 className="text-base font-semibold text-[#1A1A2E]">Payment confirmation</h2>
+                    <p className="mt-1 text-xs text-[#6B7280]">Your Cal.com slot is being booked live above. Share WhatsApp and payment details below.</p>
+                  </div>
+
+                  <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-sm font-medium text-[#1A1A2E]">WhatsApp Number</label>
+                      <SmoothInput
+                        {...register('whatsappNumber')}
+                        placeholder="03XX-XXXXXXX"
+                        className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm placeholder:text-gray-300 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]"
+                      />
+                      {errors.whatsappNumber && <p className="text-xs text-red-500">{errors.whatsappNumber.message}</p>}
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <label className="text-sm font-medium text-[#1A1A2E]">Payment Method</label>
+                      <select
+                        {...register('paymentMethod')}
+                        className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]"
+                      >
+                        <option value="">Select payment method</option>
+                        {paymentOptions.length > 0 ? paymentOptions.map((option) => (
+                          <option key={option.method || option.value} value={option.method}>{option.method}</option>
+                        )) : (
+                          <option disabled>No payment methods available</option>
+                        )}
+                      </select>
+                      {errors.paymentMethod && <p className="text-xs text-red-500">{errors.paymentMethod.message}</p>}
+                    </div>
+
+                    <div className="flex items-start gap-2 rounded-xl border border-[#52B788]/30 bg-[#E1F5EE] p-3 text-sm text-[#2D6A4F]">
+                      <ShieldCheck size={14} className="mt-0.5 flex-shrink-0" />
+                      <span>Send payment first, then enter your transaction reference below.</span>
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <label className="text-sm font-medium text-[#1A1A2E]">Transaction ID / TID</label>
+                      <SmoothInput
+                        {...register('transactionId')}
+                        placeholder="e.g. TXN8823991"
+                        className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm placeholder:text-gray-300 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]"
+                      />
+                      {errors.transactionId && <p className="text-xs text-red-500">{errors.transactionId.message}</p>}
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <label className="text-sm font-medium text-[#1A1A2E]">Additional notes (optional)</label>
+                      <textarea
+                        {...register('additionalNotes')}
+                        rows={3}
+                        placeholder="Any special notes or booking instructions..."
+                        className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm placeholder:text-gray-300 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]"
+                      />
+                    </div>
+
+                    {submitError && <p className="text-sm text-red-600">{submitError}</p>}
+
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#2D6A4F] py-4 text-base font-semibold text-white transition hover:bg-[#245c43] disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 size={16} className="animate-spin" />
+                          Submitting...
+                        </>
+                      ) : (
+                        <>
+                          Confirm Booking — PKR {consultationFee.toLocaleString()}
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
               ) : (
                 // FORM
                 <form onSubmit={handleSubmit(onSubmit)}>

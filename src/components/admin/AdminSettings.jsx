@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Plus, Trash2 } from 'lucide-react'
+import { Plus, Trash2, Calendar, Save, Loader2, CheckCircle2 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { SmoothInput } from '../SmoothInput'
+import { normalizeCalLink } from '../../hooks/useSiteSettings'
 
 const defaultPaymentMethods = [
   { method: 'JazzCash', value: '0300-0000000', details: 'Zainab Mohsin', subtitle: '', active: true },
@@ -11,9 +13,12 @@ const defaultPaymentMethods = [
 export default function AdminSettings({ refreshKey = 0 }) {
   const [siteSettingsId, setSiteSettingsId] = useState(null)
   const [consultationFee, setConsultationFee] = useState('2000')
+  const [consultationCalLink, setConsultationCalLink] = useState('')
   const [paymentMethods, setPaymentMethods] = useState(defaultPaymentMethods)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [savingCalLink, setSavingCalLink] = useState(false)
+  const [calLinkSuccess, setCalLinkSuccess] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
@@ -31,6 +36,7 @@ export default function AdminSettings({ refreshKey = 0 }) {
         if (data) {
           setSiteSettingsId(data.id)
           setConsultationFee(String(data.consultation_fee ?? 2000))
+          setConsultationCalLink(typeof data.consultation_cal_link === 'string' ? data.consultation_cal_link.replace(/^"|"$/g, '') : data.consultation_cal_link || '')
           setPaymentMethods(Array.isArray(data.payment_methods) && data.payment_methods.length > 0 ? data.payment_methods : defaultPaymentMethods)
         } else {
           setSiteSettingsId(null)
@@ -77,11 +83,12 @@ export default function AdminSettings({ refreshKey = 0 }) {
     if (!fee || fee <= 0) {
       setError('Consultation fee must be a valid positive number.')
       setSaving(false)
-      return
+      return false
     }
 
     const payload = {
       consultation_fee: fee,
+      consultation_cal_link: normalizeCalLink(consultationCalLink),
       payment_methods: paymentMethods,
       updated_at: new Date().toISOString(),
     }
@@ -99,10 +106,23 @@ export default function AdminSettings({ refreshKey = 0 }) {
       }
       setSuccess('Settings saved successfully.')
       setTimeout(() => setSuccess(''), 3000)
+      return true
     } catch (err) {
       setError(err.message || 'Unable to save settings.')
+      return false
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleSaveCalLink = async () => {
+    setSavingCalLink(true)
+    setCalLinkSuccess(false)
+    const saved = await handleSave()
+    setSavingCalLink(false)
+    if (saved) {
+      setCalLinkSuccess(true)
+      setTimeout(() => setCalLinkSuccess(false), 3000)
     }
   }
 
@@ -220,6 +240,75 @@ export default function AdminSettings({ refreshKey = 0 }) {
           >
             {saving ? 'Saving...' : 'Save settings'}
           </button>
+        </div>
+      </div>
+      <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
+        <div className="flex items-center gap-2 mb-1">
+          <div className="w-8 h-8 rounded-xl bg-[#EEF2FF] flex items-center justify-center">
+            <Calendar size={16} className="text-[#4F46E5]" />
+          </div>
+          <div>
+            <h2 className="font-semibold text-[#1A1A2E] text-base">Consultation — Cal.com Booking Link</h2>
+            <p className="text-xs text-[#6B7280]">Paste the consultation event slug here so the live calendar shows on the booking page.</p>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <label className="text-sm font-medium text-[#1A1A2E]">Cal.com Link</label>
+          <SmoothInput
+            value={consultationCalLink}
+            onChange={(e) => setConsultationCalLink(e.target.value)}
+            placeholder="drzainabmohsin/consultation"
+            className="rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-[#1A1A2E] focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]"
+          />
+          <p className="text-xs text-[#6B7280] mt-1">
+            Format: <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded">your-username/event-slug</span> — do NOT include https:// or cal.com/
+          </p>
+          {consultationCalLink && (
+            <a
+              href={`https://cal.com/${consultationCalLink}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-[#4F46E5] underline"
+            >
+              Preview: cal.com/{consultationCalLink} →
+            </a>
+          )}
+        </div>
+
+        <div className="mt-4 rounded-xl border border-indigo-100 bg-[#F0F4FF] p-3 text-xs text-[#4F46E5]">
+          <p className="font-medium">How to get your Cal.com link:</p>
+          <ol className="mt-2 flex list-decimal flex-col gap-1 pl-4 text-[#334155]">
+            <li>Go to app.cal.com and log in</li>
+            <li>Click Event Types and open your consultation event</li>
+            <li>Copy the event slug, not the full URL</li>
+            <li>It should look like: <span className="font-mono">drzainabmohsin/consultation</span></li>
+            <li>Paste it above and click Save</li>
+          </ol>
+        </div>
+
+        <div className="mt-4 flex items-center gap-3">
+          <button
+            type="button"
+            onClick={handleSaveCalLink}
+            disabled={savingCalLink || !consultationCalLink.trim()}
+            className="inline-flex items-center gap-2 rounded-2xl bg-[#2D6A4F] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#245c43] disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {savingCalLink ? (
+              <>
+                <Loader2 size={14} className="animate-spin" /> Saving...
+              </>
+            ) : (
+              <>
+                <Save size={14} /> Save Cal.com Link
+              </>
+            )}
+          </button>
+          {calLinkSuccess && (
+            <span className="text-sm text-[#16A34A] flex items-center gap-1">
+              <CheckCircle2 size={14} /> Saved! Live on consultation page now.
+            </span>
+          )}
         </div>
       </div>
     </div>
