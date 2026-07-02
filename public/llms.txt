@@ -1,0 +1,13 @@
+# Dr. Zainab Mohsin - Online Gynecology Consultations
+
+> Expert guidance on pregnancy, safe delivery, and newborn care — from the comfort of home.
+
+Dr. Zainab Mohsin is a verified Consultant Gynecologist with MBBS and FCPS qualifications and over 10 years of clinical experience. She has helped over 500+ mothers across Pakistan.
+
+## Services
+- Online Video Consultations (30 mins via Google Meet)
+- Dedicated Masterclasses on Pregnancy and Baby Care
+
+## Contact & Booking
+- Book consultations directly at: https://gynae.vercel.app/booking
+- WhatsApp support is available post-consultation.

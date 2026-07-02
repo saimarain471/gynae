@@ -111,33 +111,18 @@ export default function HeroSection() {
               </span>
             </motion.div>
 
-            <motion.h1
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="mb-3 font-['Playfair_Display'] text-4xl font-bold leading-tight text-[#1A1A2E] md:text-5xl"
-            >
+            <h1 className="mb-3 font-['Playfair_Display'] text-4xl font-bold leading-tight text-[#1A1A2E] md:text-5xl">
               Dr. Zainab{' '}
               <span className="text-[#2D6A4F]">Mohsin</span>
-            </motion.h1>
+            </h1>
 
-            <motion.p
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.15 }}
-              className="mb-4 text-lg font-medium text-[#2D6A4F] md:text-xl"
-            >
+            <p className="mb-4 text-lg font-medium text-[#2D6A4F] md:text-xl">
               Consultant Gynecologist &amp; Women&apos;s Health Educator
-            </motion.p>
+            </p>
 
-            <motion.p
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="mb-6 max-w-md text-base leading-relaxed text-[#6B7280]"
-            >
+            <p className="mb-6 max-w-md text-base leading-relaxed text-[#6B7280]">
               Learn everything about pregnancy, safe delivery, and newborn care — guided by a specialist you can trust, from the comfort of home.
-            </motion.p>
+            </p>
 
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -203,7 +188,7 @@ export default function HeroSection() {
                       <span className="text-2xl font-bold text-[#2D6A4F] font-['Playfair_Display']">ZM</span>
                     </div>
                     <p className="text-sm font-semibold text-[#2D6A4F]">Dr. Zainab Mohsin</p>
-                    <p className="mt-1 text-xs text-[#6B7280]">Photo coming soon</p>
+                    <p className="mt-1 text-xs text-[#374151]">Photo coming soon</p>
                   </div>
                 )}
               </div>

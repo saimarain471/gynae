@@ -2,9 +2,9 @@ import { Suspense, lazy, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
-import WhatsAppButton from './components/WhatsAppButton'
 import { posthog } from './lib/posthog'
 
+const WhatsAppButton = lazy(() => import('./components/WhatsAppButton'))
 const Home = lazy(() => import('./pages/Home'))
 const About = lazy(() => import('./pages/About'))
 const Classes = lazy(() => import('./pages/Classes'))
@@ -56,7 +56,9 @@ export default function App() {
         </Suspense>
         <Footer />
 
-        <WhatsAppButton />
+        <Suspense fallback={null}>
+          <WhatsAppButton />
+        </Suspense>
       </div>
     </Router>
   )
