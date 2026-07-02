@@ -6,5 +6,20 @@ export default defineConfig({
   plugins: [react()],
   build: {
     target: 'es2020',
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('lucide-react')) {
+            return 'icons';
+          }
+          if (id.includes('@supabase/supabase-js')) {
+            return 'supabase';
+          }
+          if (id.includes('framer-motion')) {
+            return 'framer-motion';
+          }
+        }
+      }
+    }
   },
 })

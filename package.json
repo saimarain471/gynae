@@ -42,5 +42,8 @@
     "rollup-plugin-visualizer": "^7.0.1",
     "tailwindcss": "^3.4.4",
     "vite": "^8.1.0"
-  }
+  },
+  "browserslist": [
+    "defaults and fully supports es6-module"
+  ]
 }

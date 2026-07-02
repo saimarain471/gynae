@@ -20,64 +20,45 @@ export default function Home() {
   const { settings } = useSiteSettings()
   const [featuredTestimonials, setFeaturedTestimonials] = useState([])
   const [topFaqs, setTopFaqs] = useState([])
-  const [featuredClasses, setFeaturedClasses] = useState([])
+  const [featuredClasses, setFeaturedClasses] = useState(fallbackClasses.slice(0, 3))
   const [openFaqId, setOpenFaqId] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
   const consultationFee = settings?.consultation_fee ?? 2000
 
-  async function fetchFeaturedTestimonials() {
-    const { data } = await supabase
-      .from('testimonials')
-      .select('*')
-      .eq('approved', true)
-      .eq('featured', true)
-      .order('created_at', { ascending: false })
-      .limit(3)
-
-    if (data && data.length > 0) {
-      setFeaturedTestimonials(data)
-    } else {
-      // Fallback: grab latest approved (not necessarily featured)
-      const { data: fallback } = await supabase
-        .from('testimonials')
-        .select('*')
-        .eq('approved', true)
-        .order('created_at', { ascending: false })
-        .limit(3)
-      setFeaturedTestimonials(fallback || [])
-    }
-  }
-
-  async function fetchTopFaqs() {
-    const { data } = await supabase
-      .from('faqs')
-      .select('*')
-      .eq('published', true)
-      .order('sort_order', { ascending: true })
-      .limit(5)
-    setTopFaqs(data || [])
-  }
-
-  async function fetchFeaturedClasses() {
-    const { data } = await supabase.from('classes').select('*').eq('visible', true).order('created_at', { ascending: false }).limit(3)
-    if (data && data.length > 0) {
-      setFeaturedClasses(data.map((item) => ({
-        ...item,
-        lessons: item.modules || item.lessons || 1,
-        price: item.price,
-        priceLabel: `PKR ${Number(item.price || 0).toLocaleString()}`,
-      })))
-    } else {
-      setFeaturedClasses(fallbackClasses.slice(0, 3))
-    }
-  }
-
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      fetchFeaturedTestimonials()
-      fetchTopFaqs()
-      fetchFeaturedClasses()
+    let isMounted = true
+    const timer = window.setTimeout(async () => {
+      const [testimonialsRes, faqsRes, classesRes, fallbackRes] = await Promise.all([
+        supabase.from('testimonials').select('*').eq('approved', true).eq('featured', true).order('created_at', { ascending: false }).limit(3),
+        supabase.from('faqs').select('*').eq('published', true).order('sort_order', { ascending: true }).limit(5),
+        supabase.from('classes').select('*').eq('visible', true).order('created_at', { ascending: false }).limit(3),
+        supabase.from('testimonials').select('*').eq('approved', true).order('created_at', { ascending: false }).limit(3)
+      ])
+
+      if (!isMounted) return
+
+      if (testimonialsRes.data && testimonialsRes.data.length > 0) {
+        setFeaturedTestimonials(testimonialsRes.data)
+      } else if (fallbackRes.data) {
+        setFeaturedTestimonials(fallbackRes.data)
+      }
+
+      setTopFaqs(faqsRes.data || [])
+
+      if (classesRes.data && classesRes.data.length > 0) {
+        setFeaturedClasses(classesRes.data.map((item) => ({
+          ...item,
+          lessons: item.modules || item.lessons || 1,
+          price: item.price,
+          priceLabel: `PKR ${Number(item.price || 0).toLocaleString()}`,
+        })))
+      }
+      setIsLoading(false)
     }, 0)
-    return () => window.clearTimeout(timer)
+    return () => {
+      isMounted = false
+      window.clearTimeout(timer)
+    }
   }, [])
 
   return (
@@ -140,9 +121,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Testimonials — from Supabase if available, else nothing */}
-      {featuredTestimonials.length > 0 && (
-        <section className="bg-white py-16">
+      {/* Testimonials */}
+      {(isLoading || featuredTestimonials.length > 0) && (
+        <section className="bg-white py-16 min-h-[450px]">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="flex items-center gap-2 mb-2">
               <span className="inline-flex items-center gap-1.5 bg-[#E1F5EE] text-[#2D6A4F] text-xs font-semibold px-3 py-1 rounded-full">
@@ -167,9 +148,9 @@ export default function Home() {
         </section>
       )}
 
-      {/* FAQ preview — from Supabase */}
-      {topFaqs.length > 0 && (
-        <section className="bg-white py-16 border-t border-gray-100">
+      {/* FAQ preview */}
+      {(isLoading || topFaqs.length > 0) && (
+        <section className="bg-white py-16 border-t border-gray-100 min-h-[400px]">
           <div className="mx-auto max-w-3xl px-6 lg:px-8">
             <div className="flex items-center gap-2 mb-2">
               <span className="inline-flex items-center gap-1.5 bg-[#E1F5EE] text-[#2D6A4F] text-xs font-semibold px-3 py-1 rounded-full">

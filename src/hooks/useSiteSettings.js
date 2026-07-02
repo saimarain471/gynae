@@ -34,36 +34,51 @@ export function getActivePaymentMethods(settings = defaultSettings) {
   return (settings?.payment_methods || defaultPaymentMethods).filter((method) => method.active)
 }
 
+let cachedSettings = null;
+let fetchPromise = null;
+
 export function useSiteSettings() {
-  const [settings, setSettings] = useState(defaultSettings)
-  const [loading, setLoading] = useState(true)
+  const [settings, setSettings] = useState(cachedSettings || defaultSettings)
+  const [loading, setLoading] = useState(!cachedSettings)
   const [error, setError] = useState('')
 
   useEffect(() => {
     let isMounted = true
 
     async function loadSettings() {
-      setLoading(true)
-      setError('')
+      if (cachedSettings) {
+        setSettings(cachedSettings)
+        setLoading(false)
+        return
+      }
 
-      const { data, error: fetchError } = await supabase
-        .from('site_settings')
-        .select('*')
-        .order('updated_at', { ascending: false })
-        .limit(1)
-        .maybeSingle()
+      if (!fetchPromise) {
+        fetchPromise = supabase
+          .from('site_settings')
+          .select('*')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+      }
+
+      setLoading(true)
+      const { data, error: fetchError } = await fetchPromise
 
       if (!isMounted) return
 
       if (fetchError) {
         setError(fetchError.message)
         setSettings(defaultSettings)
+        fetchPromise = null // Reset promise on error so it can be retried
       } else if (data) {
-        setSettings({
+        const newSettings = {
           consultation_fee: data.consultation_fee ?? defaultSettings.consultation_fee,
           payment_methods: Array.isArray(data.payment_methods) ? data.payment_methods : defaultSettings.payment_methods,
-        })
+        }
+        cachedSettings = newSettings
+        setSettings(newSettings)
       } else {
+        cachedSettings = defaultSettings
         setSettings(defaultSettings)
       }
 
