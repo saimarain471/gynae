@@ -17,6 +17,7 @@
     "@fontsource/playfair-display": "^5.2.8",
     "@hookform/resolvers": "^3.4.1",
     "@supabase/supabase-js": "^2.33.0",
+    "clsx": "^2.1.1",
     "framer-motion": "^11.0.0",
     "lucide-react": "^0.472.0",
     "posthog-js": "^1.81.0",
@@ -25,6 +26,7 @@
     "react-hook-form": "^7.46.0",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^6.17.0",
+    "tailwind-merge": "^3.6.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {

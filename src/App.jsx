@@ -2,6 +2,7 @@ import { Suspense, lazy, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
+import CustomCursor from './components/CustomCursor'
 import { posthog } from './lib/posthog'
 
 const WhatsAppButton = lazy(() => import('./components/WhatsAppButton'))
@@ -34,6 +35,7 @@ export default function App() {
   return (
     <Router>
       <div className="min-h-screen bg-background text-text">
+        <CustomCursor />
         <Navbar />
         <ScrollToTop />
         <Suspense fallback={<div className="min-h-[60vh] bg-background" />}>
