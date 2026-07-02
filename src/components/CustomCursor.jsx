@@ -9,14 +9,14 @@ export default function CustomCursor() {
   const cursorX = useMotionValue(-100);
   const cursorY = useMotionValue(-100);
 
-  const springConfig = { damping: 25, stiffness: 700 };
+  const springConfig = { damping: 15, stiffness: 1000 };
   const cursorXSpring = useSpring(cursorX, springConfig);
   const cursorYSpring = useSpring(cursorY, springConfig);
 
   useEffect(() => {
     const moveCursor = (e) => {
-      cursorX.set(e.clientX - 16);
-      cursorY.set(e.clientY - 16);
+      cursorX.set(e.clientX - 1);
+      cursorY.set(e.clientY - 1);
       if (!isVisible) setIsVisible(true);
 
       // Check if hovering over a clickable element
@@ -43,20 +43,29 @@ export default function CustomCursor() {
   return (
     <motion.div
       className={cn(
-        "pointer-events-none fixed left-0 top-0 z-[9999] hidden h-8 w-8 rounded-full border-2 transition-all duration-150 md:flex items-center justify-center",
-        isVisible ? "opacity-100" : "opacity-0",
-        isPointer 
-          ? "border-primary bg-primary/20 scale-150" 
-          : "border-primary bg-transparent"
+        "pointer-events-none fixed left-0 top-0 z-[9999] hidden transition-all duration-150 md:flex",
+        isVisible ? "opacity-100" : "opacity-0"
       )}
       style={{
         x: cursorXSpring,
         y: cursorYSpring,
       }}
     >
-      {isPointer && (
-        <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-      )}
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        className={cn(
+          "transition-all duration-200 drop-shadow-md origin-top-left",
+          isPointer ? "fill-primary stroke-primary scale-125" : "fill-white stroke-[#1A1A2E]"
+        )}
+      >
+        <path
+          d="M1 1l7 17 2.5-7.5L18 8 1 1z"
+          strokeWidth="1.5"
+          strokeLinejoin="round"
+        />
+      </svg>
     </motion.div>
   );
 }
