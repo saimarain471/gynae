@@ -27,6 +27,13 @@ const defaultForm = {
   featured: false,
   cal_link: '',
   payment_methods: defaultPaymentMethods,
+  meta_title: '',
+  meta_description: '',
+  what_you_learn: [],
+  curriculum: [],
+  requirements: '',
+  who_is_this_for: '',
+  faqs: [],
 }
 
 function ToggleRow({ label, value, onChange }) {
@@ -72,6 +79,13 @@ export default function AdminClassEditor({ classData, mode, onClose, onSaved }) 
         featured: Boolean(classData.featured),
         cal_link: classData.cal_link || '',
         payment_methods: Array.isArray(classData.payment_methods) && classData.payment_methods.length > 0 ? classData.payment_methods : defaultPaymentMethods,
+        meta_title: classData.meta_title || '',
+        meta_description: classData.meta_description || '',
+        what_you_learn: Array.isArray(classData.what_you_learn) ? classData.what_you_learn : [],
+        curriculum: Array.isArray(classData.curriculum) ? classData.curriculum : [],
+        requirements: classData.requirements || '',
+        who_is_this_for: classData.who_is_this_for || '',
+        faqs: Array.isArray(classData.faqs) ? classData.faqs : [],
       })
       setSlots(classData.schedule_slots || [])
     } else {
@@ -167,6 +181,13 @@ export default function AdminClassEditor({ classData, mode, onClose, onSaved }) 
         schedule_slots: slots,
         cal_link: form.cal_link.trim() || null,
         payment_methods: Array.isArray(form.payment_methods) ? form.payment_methods : defaultPaymentMethods,
+        meta_title: form.meta_title?.trim() || null,
+        meta_description: form.meta_description?.trim() || null,
+        what_you_learn: form.what_you_learn || [],
+        curriculum: form.curriculum || [],
+        requirements: form.requirements?.trim() || null,
+        who_is_this_for: form.who_is_this_for?.trim() || null,
+        faqs: form.faqs || [],
       }
 
       if (mode === 'edit' && classData?.id) {
@@ -245,6 +266,109 @@ export default function AdminClassEditor({ classData, mode, onClose, onSaved }) 
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-medium text-[#1A1A2E]">Thumbnail URL</label>
               <input value={form.thumbnail_url} onChange={(e) => updateField('thumbnail_url', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+            </div>
+
+            {/* Thumbnail preview */}
+            {form.thumbnail_url && (
+              <div className="rounded-xl overflow-hidden aspect-video bg-[#E1F5EE]">
+                <img src={form.thumbnail_url} alt="Thumbnail preview" className="w-full h-full object-cover"
+                     onError={(e) => e.target.style.display='none'} />
+              </div>
+            )}
+
+            {/* SEO fields */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium text-[#1A1A2E]">
+                SEO Title <span className="text-[#6B7280] font-normal text-xs">(shown in Google results)</span>
+              </label>
+              <input value={form.meta_title} onChange={e => updateField('meta_title', e.target.value)}
+                placeholder="Pregnancy Week by Week Class — Dr. Zainab Mohsin"
+                className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium text-[#1A1A2E]">
+                SEO Description <span className="text-[#6B7280] font-normal text-xs">({(form.meta_description || '').length}/160)</span>
+              </label>
+              <textarea value={form.meta_description} onChange={e => updateField('meta_description', e.target.value.slice(0,160))}
+                rows={3} placeholder="Short description shown in Google search results..."
+                className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788] resize-none" />
+            </div>
+            
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium text-[#1A1A2E]">Who Is This For?</label>
+              <textarea rows="3" value={form.who_is_this_for} onChange={(e) => updateField('who_is_this_for', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium text-[#1A1A2E]">Requirements</label>
+              <textarea rows="2" value={form.requirements} onChange={(e) => updateField('requirements', e.target.value)} className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+            </div>
+
+            {/* What You'll Learn — dynamic list */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium text-[#1A1A2E]">What You'll Learn</label>
+              {(form.what_you_learn || []).map((item, i) => (
+                <div key={i} className="flex gap-2">
+                  <input value={item}
+                    onChange={e => {
+                      const updated = [...form.what_you_learn]
+                      updated[i] = e.target.value
+                      updateField('what_you_learn', updated)
+                    }}
+                    placeholder={`Learning point ${i+1}`}
+                    className="flex-1 rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+                  <button type="button" onClick={() => updateField('what_you_learn', form.what_you_learn.filter((_,j) => j !== i))}
+                    className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-400 hover:bg-red-100">
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+              <button type="button" onClick={() => updateField('what_you_learn', [...(form.what_you_learn || []), ''])}
+                className="self-start text-sm font-medium text-[#2D6A4F] hover:underline">+ Add point</button>
+            </div>
+
+            {/* Curriculum — dynamic table */}
+            <div className="flex flex-col gap-1.5 mt-2">
+              <label className="text-sm font-medium text-[#1A1A2E]">Curriculum (module list)</label>
+              {(form.curriculum || []).map((item, i) => (
+                <div key={i} className="flex gap-2">
+                  <input value={item.week} onChange={e => {
+                    const u=[...form.curriculum]; u[i].week=e.target.value; updateField('curriculum', u)
+                  }} placeholder="Week 1" className="w-20 rounded-xl border border-gray-200 px-3 py-2 text-xs focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+                  <input value={item.title} onChange={e => {
+                    const u=[...form.curriculum]; u[i].title=e.target.value; updateField('curriculum', u)
+                  }} placeholder="Module title" className="flex-1 rounded-xl border border-gray-200 px-3 py-2 text-xs focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+                  <input value={item.duration} onChange={e => {
+                    const u=[...form.curriculum]; u[i].duration=e.target.value; updateField('curriculum', u)
+                  }} placeholder="30 min" className="w-20 rounded-xl border border-gray-200 px-3 py-2 text-xs focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+                  <button type="button" onClick={() => updateField('curriculum', form.curriculum.filter((_,j)=>j!==i))}
+                    className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-400 hover:bg-red-100">
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+              <button type="button" onClick={() => updateField('curriculum', [...(form.curriculum || []), {week:'',title:'',duration:''}])}
+                className="self-start text-sm font-medium text-[#2D6A4F] hover:underline">+ Add module</button>
+            </div>
+
+            {/* FAQs — dynamic Q&A */}
+            <div className="flex flex-col gap-1.5 mt-2">
+              <label className="text-sm font-medium text-[#1A1A2E]">FAQs</label>
+              {(form.faqs || []).map((item, i) => (
+                <div key={i} className="rounded-xl border border-gray-100 p-3">
+                  <input value={item.q} onChange={e => {
+                    const u=[...form.faqs]; u[i].q=e.target.value; updateField('faqs', u)
+                  }} placeholder="Question" className="mb-2 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+                  <input value={item.a} onChange={e => {
+                    const u=[...form.faqs]; u[i].a=e.target.value; updateField('faqs', u)
+                  }} placeholder="Answer" className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#52B788]" />
+                  <button type="button" onClick={() => updateField('faqs', form.faqs.filter((_,j)=>j!==i))}
+                    className="mt-2 text-xs font-medium text-red-400 hover:underline">Remove</button>
+                </div>
+              ))}
+              <button type="button" onClick={() => updateField('faqs', [...(form.faqs || []), {q:'',a:''}])}
+                className="self-start text-sm font-medium text-[#2D6A4F] hover:underline">+ Add FAQ</button>
             </div>
 
             <div className="grid grid-cols-2 gap-3">

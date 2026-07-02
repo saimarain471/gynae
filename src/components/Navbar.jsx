@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { Menu, X, Leaf } from 'lucide-react'
-
+import { TextRoll } from "./TextRoll"
 const navItems = [
   { label: 'Home', to: '/' },
   { label: 'About', to: '/about' },
@@ -42,17 +42,17 @@ export default function Navbar() {
                 to={item.to}
                 className={`relative text-sm transition-colors ${isActiveLink(item.to) ? 'font-semibold text-[#2D6A4F] after:absolute after:bottom-[-4px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-[#2D6A4F]' : 'text-[#6B7280] hover:text-[#2D6A4F]'}`}
               >
-                {item.label}
+                <TextRoll className="text-sm font-medium">{item.label}</TextRoll>
               </NavLink>
             ))}
           </nav>
 
           <div className="hidden items-center gap-3 lg:flex">
             <Link to="/blog/admin" className="rounded-xl border border-[#2D6A4F]/20 bg-[#E1F5EE] px-3 py-2 text-sm font-semibold text-[#2D6A4F] transition-colors hover:bg-[#d7efe2]">
-              Manage Blog
+              <TextRoll className="text-sm font-semibold text-[#2D6A4F]">Manage Blog</TextRoll>
             </Link>
             <Link to="/booking" className="rounded-xl bg-[#2D6A4F] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#245c43]">
-              Book Now
+              <TextRoll className="text-sm font-semibold text-white">Book Now</TextRoll>
             </Link>
           </div>
 
@@ -94,7 +94,7 @@ export default function Navbar() {
               onClick={() => setMenuOpen(false)}
               className={`rounded-xl px-4 py-3 text-sm font-medium transition-colors ${pathname === item.to ? 'bg-[#E1F5EE] font-semibold text-[#2D6A4F]' : 'text-[#1A1A2E] hover:bg-gray-50'}`}
             >
-              {item.label}
+              <TextRoll className="text-sm font-medium">{item.label}</TextRoll>
             </Link>
           ))}
         </nav>
@@ -105,14 +105,14 @@ export default function Navbar() {
             onClick={() => setMenuOpen(false)}
             className="block w-full rounded-xl border border-[#2D6A4F]/20 bg-[#E1F5EE] py-3 text-center text-sm font-semibold text-[#2D6A4F] transition-colors hover:bg-[#d7efe2]"
           >
-            Manage Blog
+            <TextRoll className="text-sm font-semibold text-[#2D6A4F] flex justify-center">Manage Blog</TextRoll>
           </Link>
           <Link
             to="/booking"
             onClick={() => setMenuOpen(false)}
             className="block w-full rounded-xl bg-[#2D6A4F] py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-[#245c43]"
           >
-            Book Consultation
+            <TextRoll className="text-sm font-semibold text-white flex justify-center">Book Consultation</TextRoll>
           </Link>
         </div>
       </div>
